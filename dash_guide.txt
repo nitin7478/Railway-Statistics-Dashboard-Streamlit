@@ -1,0 +1,35 @@
+We will look into bootstrap dash page design 
+Layout Introduction:
+
+1. Columns go inside Rows, so define Rows first!
+2. Define column width (page always has 12 columns):
+    a. Columns will expand to fit space on page if width is not defined.
+    b. width=3 means y/4 of a page; width=6 means 1/2 of a page
+    c. width also has a dictionary of key-value: size=1 ... 12, True, 'auto';
+        offset=1 ... 12; order=1 ... 12, 'first', 'last';
+    d. you can also control width for screen sizes: xs, sm, md, lg, and xl
+        i. 1g=9 means that for 'large' or bigger screens, the component would take
+            9 columns (3/4 of screen). But if we also define width=3, when screen is
+            smaller than 'lalye', the component would take 3 columns (1/4 of screen)
+
+
+
+html.div([
+    dbc.row(
+        dbc.Col(html.H3())
+    )
+])
+
+first we have html div , and then dbc.row. we will component row wize.
+inside row we have to manage columns.
+
+Every page has 12 invisible columns 
+width : width defines how many column we want each component
+width can also be define as dictionary of values
+e.g width = {'size':6 , offset:1, order = 1}
+size:true means take all the size 
+size : auto  means take automatic size as per your text 
+offset : 2 means empty space of 2 columns to the left
+
+
+no_gutter to space between things
