@@ -23,10 +23,40 @@ conn = engine.connect()
 
 # Define function to load division earnings data
 def load_division_earnings_data(selected_division):
+    if selected_division:
+        selected_division = selected_division.lower()
+        select_query = text(f"SELECT * FROM division_earnings WHERE division_code = '{selected_division}'")
+        earnings_df = pd.read_sql_query(select_query, conn)
+        # conn.close()
+        return earnings_df
+
+
+# Define function to load division earnings data
+def load_division_target_data(selected_division):
     # Execute the query and read into a DataFrame
     selected_division = selected_division.lower()
-    select_query = text(f"SELECT * FROM division_earnings WHERE division_code = '{selected_division}'")
+    select_query = text(f"SELECT * FROM division_target WHERE division_code = '{selected_division}'")
     earnings_df = pd.read_sql_query(select_query, conn)
     return earnings_df
 
 
+def load_division_goods_monthwise_outward_data(selected_division):
+    # Execute the query and read into a DataFrame
+    selected_division = selected_division.lower()
+    select_query = text(f"SELECT * FROM division_goods_monthwise_outward WHERE division_code = '{selected_division}'")
+    earnings_df = pd.read_sql_query(select_query, conn)
+    return earnings_df
+
+
+def load_division_good_yearly_depowisesoutward_data(selected_division):
+    # Execute the query and read into a DataFrame
+    selected_division = selected_division.lower()
+    select_query = text(f"SELECT * FROM division_goods_depowise_yearly_earning WHERE division_code = '{selected_division}'")
+    earnings_df = pd.read_sql_query(select_query, conn)
+    return earnings_df
+
+def load_division_commoditywise_yearly_data(selected_division):
+    selected_division = selected_division.lower()
+    select_query = text(f"SELECT * FROM division_goods_commodity_outward WHERE division_code = '{selected_division}'")
+    earnings_df = pd.read_sql_query(select_query, conn)
+    return earnings_df

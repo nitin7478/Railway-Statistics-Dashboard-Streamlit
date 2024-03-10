@@ -3,3 +3,4 @@ dash
 python-dotenv
 pandas
 nbformat 
+xlsxwriter
