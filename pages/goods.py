@@ -6,73 +6,36 @@ import dash_bootstrap_components as dbc
 import datetime
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
-
-from src.components.plot_functions import comparison_line_plot,\
-                            yearly_data_comparison_line_plot,\
-                                plot_pie_chart
-from src.components.database_connection import load_division_goods_monthwise_outward_data,\
-                                            load_division_target_data,\
-                                        load_division_good_yearly_depowisesoutward_data,\
-                                        load_division_commoditywise_yearly_data
+from src.components.database_connection import handle_database
+from src.constants.constants import *
 
 class load_goods_page:
     def __init__(self , selected_division):
         self.selected_division = selected_division
-        self.division_goods_outward_df =load_division_goods_monthwise_outward_data(selected_division=self.selected_division)
-        self.division_target_df = load_division_target_data(selected_division=selected_division)
-        self.division_depowise_outward_df = load_division_good_yearly_depowisesoutward_data(selected_division=selected_division)
-        self.division_commodity_wise_outward_df = load_division_commoditywise_yearly_data(selected_division=selected_division)
-        goods_outward = self.division_goods_outward_df
+        class_object = handle_database()
+        class_object.load_dataframe(self.selected_division,DB_DIVISION_GOODS_MONTHEWISE_YEARWISE_OW)
+        self.cy_division_goods_outward_df =class_object.cy_dataframe
+        self.ly_division_goods_outward_df = class_object.ly_dataframe
+        self.cy_division_target_df = class_object.cy_division_target_df
+        self.full_ow_dataframe = class_object.full_dataframe.sort_values(by='earning_month',ascending=False)
         
+        class_object.load_dataframe(self.selected_division,DB_DIVISION_GOODS_DEPOWISE_YEARWISE_OW)
+        # self.division_depowise_outward_df = class_object.full_dataframe
+        self.cy_depowise_df_yearly_ow = class_object.cy_dataframe_yearly_data
+        self.ly_depowise_df_yearly_ow = class_object.ly_dataframe_yearly_data
+        self.full_depowise_yearly_df = class_object.full_dataframe
         
-        current_date = datetime.datetime.now()
-        current_year = current_date.year
-        current_month = current_date.month
+        class_object.load_dataframe(self.selected_division, DB_DIVISION_GOODS_COMMODITY_YEARWISE_OW)
+        self.cy_commoditywise_yearly_ouward_df = class_object.cy_dataframe_yearly_data
+        self.ly_commoditywise_yearly_outward_df = class_object.ly_dataframe_yearly_data
+        self.full_commodiywise_yearly_df = class_object.full_dataframe
         
+    def comparison_line_plot(self , feature):
         
-
-        if current_month < 4:  # Financial year starts from April
-            start_year = current_year - 1
-            end_year = current_year
-        else:
-            start_year = current_year
-            end_year = current_year + 1
-            
+        current_year_df = self.cy_division_goods_outward_df.sort_values(by='earning_month')
+        previous_year_df = self.ly_division_goods_outward_df.sort_values(by='earning_month')
+        target_df = self.cy_division_target_df.sort_values(by='earning_month')
         
-        
-        financial_year_start = pd.Timestamp(year=start_year, month=4, day=1)
-        financial_year_end = pd.Timestamp(year=end_year, month=3, day=31)
-        # march_year_end = pd.Timestamp(year=end_year, month=3, day=1)
-       
-        self.current_year_monthwise_outward_data = goods_outward[(goods_outward['earning_month'] >= financial_year_start.date()) &
-                                        (goods_outward['earning_month'] <= financial_year_end.date())]
-        previous_financial_year_start = pd.Timestamp(
-            year=start_year-1, month=4, day=1)
-        previous_financial_year_end = pd.Timestamp(
-            year=end_year-1, month=3, day=31)
-        self.previous_year_monthwise_outward_data = goods_outward[(goods_outward['earning_month'] >= previous_financial_year_start.date()) &
-                                        (goods_outward['earning_month'] <= previous_financial_year_end.date())]
-        current_year = pd.Timestamp(
-        year=start_year+1, month=3, day=31)
-        previous_year = pd.Timestamp(
-            year=start_year, month=3, day=31)
-        
-        self.current_year_depowise_df = self.division_depowise_outward_df[(self.division_depowise_outward_df['earning_year'] == current_year.date())]
-                      
-        self.previous_year_depowise_df = self.division_depowise_outward_df[(self.division_depowise_outward_df['earning_year'] == previous_year.date())]
-        
-        self.current_year_commoditywise_ouward_df = self.division_commodity_wise_outward_df[(self.division_commodity_wise_outward_df['earning_year'] == current_year.date())]
-        
-        self.previous_year_commoditywise_outward_df = self.division_commodity_wise_outward_df[(self.division_commodity_wise_outward_df['earning_year'] == previous_year.date())]
-        
-    
-    
-    
-    def comparison_line_plot(self , feature , current_year_df , previous_year_df , target_df = None):
-        
-        current_year_df = current_year_df.sort_values(by='earning_month')
-        previous_year_df = previous_year_df.sort_values(by='earning_month')
-            
         months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
                     'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']
         
@@ -90,7 +53,6 @@ class load_goods_page:
             go.Scatter(x=months,
                     y=current_year_df[feature],
                     mode='lines+markers',
-                    showlegend=True,
                     name=f'CY {feature[0].upper()}{feature[1:]}',
                     hovertemplate = f'Month: %{{x}}<br>Current Year {feature[0].upper()}{feature[1:]}: %{{y:.2f}} {unit}'
             )
@@ -99,7 +61,6 @@ class load_goods_page:
             go.Scatter(x=months,
                     y=previous_year_df[feature],
                     mode='lines+markers',
-                    showlegend=True,
                     name=f'LY {feature[0].upper()}{feature[1:]}',
                     hovertemplate = f'Month: %{{x}}<br>Last Year {feature[0].upper()}{feature[1:]}: %{{y:.2f}} {unit}'
             )
@@ -120,42 +81,7 @@ class load_goods_page:
 
 
         monthly_avg_current = current_year_df[feature].mean()
-
-        # Calculate daily average revenue assuming 30 days in a month
         daily_avg_current = monthly_avg_current / 30
-        # fig.add_annotation(x=5,
-        #                 y=20,
-        #                 yanchor='middle',
-        #                 text=f'CY Monthly Avg: {monthly_avg_current:.2f} {unit}',
-        #                 showarrow=False,
-        #                 bordercolor="#c7c7c7",
-        #                 borderwidth=2,
-        #                 borderpad=4,
-        #                 bgcolor="lightgrey",
-        #                 opacity=0.8,
-        #                 font=dict(
-        #                 family="Courier New, monospace",
-        #                 size=20,
-        #                 color="black",
-        #                     ),
-        #                 )
-        # fig.add_annotation(x=5,
-        #                     y=5,
-        #                     text=f'CY Daily Avg: {daily_avg_current:.2f} {unit}',
-        #                     showarrow=False,
-        #                     # xanchor='left',
-        #                     yanchor='middle',
-        #                 bordercolor="#c7c7c7",
-        #                 borderwidth=2,
-        #                 borderpad=4,
-        #                 bgcolor="lightgrey",
-        #                 opacity=0.8,
-        #                 font=dict(
-        #                 family="Courier New, monospace",
-        #                 size=20,
-        #                 color="black",
-        #                     ),
-        # )
 
 
         # Update figure layout
@@ -166,8 +92,10 @@ class load_goods_page:
             yaxis_title=f'{feature[0].upper()}{feature[1:]} {unit}',
             margin=dict(t=50, b=10,r=10),  # Adjust top margin
             legend=dict(
-                x=0.45,  # Change the x-coordinate of the legend
-                y=1.15, #
+                yanchor="top",
+                y=1.15,
+                xanchor="right",
+                x=1,
                 font=dict(
                     family='sans-serif',
                     size=14,
@@ -183,14 +111,15 @@ class load_goods_page:
         ),
         )
 
-
         fig.update_xaxes(showline=True, linewidth=2, linecolor='black',)
 
         return fig
 
-    def yearly_data_comparison_line_plot(self,feature, current_year_df, previous_year_df, target_df=None):
-        current_year_df = current_year_df.sort_values(by=feature)
-        previous_year_df = previous_year_df.sort_values(by=feature)
+    def yearly_data_comparison_line_plot(self,feature):
+        
+        
+        current_year_df= self.cy_depowise_df_yearly_ow.sort_values(by=feature)
+        previous_year_df = self.ly_depowise_df_yearly_ow.sort_values(by=feature)
         
         fig = go.Figure()
         
@@ -228,8 +157,10 @@ class load_goods_page:
             yaxis_title=f'{feature[0].upper()}{feature[1:]} {unit}',
             margin=dict(t=20, b=5,r=5, l=5),  # Adjust top margin
             legend=dict(
-                x=0.45,  # Change the x-coordinate of the legend
-                y=1.15, # Change the y-coordinate of the legend
+                yanchor="top",
+                y=1.15,
+                xanchor="right",
+                x=1, # Change the y-coordinate of the legend
                 traceorder='normal',  # Order of the legend items
                 font=dict(
                     family='sans-serif',
@@ -251,10 +182,9 @@ class load_goods_page:
 
         return fig
     
-    def plot_pie_chart(self,current_year_commoditywise_ouward_df,previous_year_commoditywise_outward_df):
-        df_filtered = current_year_commoditywise_ouward_df[current_year_commoditywise_ouward_df['freight'] > (current_year_commoditywise_ouward_df['freight']*0.001)]
-        df_filtered_ly = previous_year_commoditywise_outward_df[previous_year_commoditywise_outward_df['freight'] > (previous_year_commoditywise_outward_df['freight'].sum()*0.001)]
-
+    def plot_pie_chart(self,):
+        df_filtered = self.cy_commoditywise_yearly_ouward_df[self.cy_commoditywise_yearly_ouward_df['freight'] > (self.cy_commoditywise_yearly_ouward_df['freight']*0.001)]
+        df_filtered_ly = self.ly_commoditywise_yearly_outward_df[self.ly_commoditywise_yearly_outward_df['freight'] > (self.ly_commoditywise_yearly_outward_df['freight'].sum()*0.001)]
         fig = make_subplots(rows=2, cols=1, specs=[[{'type':'domain'}], [{'type':'domain'}]])
 
         # Extract values and names from the filtered DataFrame
@@ -293,9 +223,60 @@ class load_goods_page:
             ),
             )
         return fig
+    
 
 
+    def plot_trend_line(self,feature):
+        full_df = self.full_ow_dataframe
+        # Create a figure with subplots
+        fig = go.Figure()
+        
+        if feature == 'freight':
+            unit = 'Crores'
+        # elif feature == 'sugar':
+        #     # full_df = self.sort_values(by='earning_month')['freight']
+        #     unit = 'Tonnes'
+        # else:
+        #     unit = ' '
+        # Add trend lines for each category
+        fig.add_trace(
+            go.Scatter(x=full_df['earning_month'],
+                    y=full_df[feature],
+                    mode='lines+markers',
+                    name=f'{feature[0].upper()}{feature[1:]}',
+                    hovertemplate = f'%{{x}} {feature[0].upper()}{feature[1:]}: %{{y:.2f}} {unit}'
+            )
+        )
 
+        # Update figure layout
+        fig.update_layout(
+            xaxis_tickangle=-45,
+            title=f'{feature[0].upper()}{feature[1:]} Trend Over Time',
+            title_x=0.15,# Center title
+            yaxis_title=f'{feature[0].upper()}{feature[1:]} {unit}',
+            margin=dict(t=50, b=10,r=10),  # Adjust top margin
+            legend=dict(
+                x=0.45,  # Change the x-coordinate of the legend
+                y=1.15, #
+                font=dict(
+                    family='sans-serif',
+                    size=14,
+                    color='black'
+                ),
+                bgcolor='rgba(255, 255, 255, 0.5)',  # Background color of the legend
+                bordercolor='rgba(0, 0, 0, 0.5)',  # Border color of the legend
+                borderwidth=1,  # Border width of the legend
+                orientation='h',
+            ),
+            yaxis=dict(
+            title_font=dict(size=15),  # Adjust font size of y-axis title
+        ),
+        )
+
+        fig.update_xaxes(showline=True, linewidth=2, linecolor='black',)
+
+        return fig
+        
 
 
 
@@ -303,22 +284,10 @@ class load_goods_page:
 
 def update_goods_page(selected_division):
         class_object = load_goods_page(selected_division=selected_division)
-        layout = html.Div([ 
-        dbc.Container([
+         
+        layout =dbc.Container([
             dbc.Row([
                 dbc.Col([
-                    # dbc.DropdownMenu(
-                    #             label="Select Type",
-                    #             children=[
-                    #                 dbc.DropdownMenuItem("Freight", id="dropdown_freight"),
-                    #                 dbc.DropdownMenuItem("Rakes", id="dropdown_rakes",),
-                    #                 dbc.DropdownMenuItem("Wagons", id="dropdown_wagons"),
-                    #                 dbc.DropdownMenuItem("Weight", id="dropdown_weight"),
-                    #             ],
-                    #         id='dropdown_goods_rake_wagon_weight',color="secondary",
-                    #         # style={'position': 'absolute', 'top': '10px', 'left': '20px', 'zIndex': '9999'},
-                    #         # className="ms-auto bg-light border"
-                    #     ),
                     dcc.Dropdown(
                         id='dropdown_goods_rake_wagon_weight',  # This ID is for the dropdown itself, not individual items
                         options=[
@@ -330,46 +299,113 @@ def update_goods_page(selected_division):
                         placeholder="Select Type",
                         clearable=False,
                         value= f"freight_{selected_division}",
-                        # You might want to add custom classes or styles to mimic the "secondary" color theme from dbc
-                        className="",  # Example class, you'd define this in your CSS
-                        # style={'width': '100%', 'color': '#000'}  # Example inline style
+                        className="",  
                     ),
-                    
                     dcc.Graph (
+                        
                         id='rake_wgn_wt_compare_graph',
-                        # style={'position': 'relative', 'width': '100%', 'height': '100%'}
+                        config={
+                        'displayModeBar': False
+                        },
                     )
                 ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,className="border-secondary border rounded"),
                 dbc.Col([
                     dcc.Graph(
-                        # figure=class_object.pot_pie_chart_this_page(),
-                        id="pie_chart_freight_comparison"
+                        figure=class_object.plot_pie_chart(),
+                        id="pie_chart_freight_comparison",
+                        config={
+                        'displayModeBar': False
+                        },
                     )
                 ], width=2, xs=12, sm=12, md=2, lg=2, xl=2,className="border-secondary border rounded"),
                 dbc.Col([
-                    dbc.DropdownMenu(
-                                label="Select Type",
-                                children=[
-                                    dbc.DropdownMenuItem("Freight", id="dropdown_freight_depowise",),
-                                    dbc.DropdownMenuItem("Rakes", id="dropdown_rakes_depowise",),
-                                    dbc.DropdownMenuItem("Wagons", id="dropdown_wagons_depowise"),
-                                    dbc.DropdownMenuItem("Weight", id="dropdown_weight_depowise"),
-                                ],
-                            id='dropdown_goods_depowise_rake_wagon_weight',color="secondary",
-            
-                            # style={'position': 'absolute', 'top': '10px', 'right': '20px', 'zIndex': '9999'},
-                            # className="ms-auto bg-light border"
-                        ),
+                     dcc.Dropdown(
+                        id='dropdown_depowise_goods_rake_wagon_weight',  # This ID is for the dropdown itself, not individual items
+                        options=[
+                            {'label': 'Freight', 'value': f"freight_{selected_division}"},
+                            {'label': 'Rakes', 'value': f"rakes_{selected_division}"},
+                            {'label': 'Wagons', 'value': f"wagons_{selected_division}"},
+                            {'label': 'Weight', 'value': f"weight_{selected_division}"}
+                        ],
+                        placeholder="Select Type",
+                        clearable=False,
+                        value= f"freight_{selected_division}",
+                        className="",  
+                    ),
 
                     dcc.Graph (
                         id='depowise_yearly_comparison_graph',
+                        config={
+                        'displayModeBar': False
+                        },
                         # style={'position': 'relative', 'width': '100%', 'height': '100%'}
                     )
                 ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,className="border-secondary border rounded"),
                 
             ], className="flex"),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(
+                        figure = class_object.plot_trend_line('freight'),
+                        id = "Revenue Trend Over Time",
+                        config={
+                        'displayModeBar': False
+                        },
+                    ),
+                ],
+                width=3,xs=12, sm=12, md=3, lg=3, xl=3,
+                className="border-secondary border rounded"),
+                dbc.Col([
+
+                    dcc.Graph(
+                     
+                    )
+                ],
+                width=3,xs=12, sm=12, md=3, lg=3, xl=3,
+                className="border-secondary border rounded"),
+                dbc.Col([
+                    dcc.Graph(
+                        
+                    )
+                ],
+                width=3,xs=12, sm=12, md=3, lg=3, xl=3,
+                className="border-secondary border rounded"),
+                dbc.Col([
+                    dcc.Graph(
+                        
+                    )
+                ],
+                width=3,xs=12, sm=12, md=3, lg=3, xl=3,
+                className="border-secondary border rounded"),
+            ], className='flex'),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Row([
+                        html.Div([
+                            "Goods Outward Data"
+                        ], className='text-center fs-5'),
+                        
+                        
+                        
+                    ], align='center'),
+                    dash_table.DataTable(data=class_object.full_ow_dataframe.to_dict('records'),)
+                                        #   columns=[i for i in class_object.full_dataframe.columns])
+                    ], width= 6, xs=12 , sm=12, md=12 , lg=6, xl=6,className="border-secondary border rounded",
+                        id='dash_table_for_goods_ow_data'),
+                dbc.Col([
+                    dbc.Row([
+                        html.Div([
+                            "Goods Depowise Outward Data"
+                        ], className='text-center fs-5')
+                        
+                    ], align='center'),
+                    dash_table.DataTable(data=class_object.full_depowise_yearly_df.to_dict('records'),)
+                                        #   columns=[i for i in class_object.full_dataframe.columns])
+                    ], width= 6, xs=12 , sm=12, md=12 , lg=6, xl=6,className="border-secondary border rounded",
+                        id='dash_table_for_goods_depowise_data'),
+            ], className='flex'),
         ], fluid=True)
-        ])
+        
         return layout
 
 
@@ -384,7 +420,47 @@ def update_goods_page(selected_division):
 def update_graph(dropdown_value):
     try:
         if dropdown_value is not None:
-            selected_feature, selected_division = dropdown_value.split('_')
+            parts = dropdown_value.split('_')
+            selected_division = parts[-1]
+            selected_feature = '_'.join(parts[:-1])
+            class_object = load_goods_page(selected_division)
+            if 'rakes' == selected_feature:
+                feature = 'rakes'
+                label = "Rakes"
+            elif 'wagons' == selected_feature:
+                feature = 'wagon'
+                label = 'Wagons'
+            elif 'freight' == selected_feature:
+                feature = 'freight'
+                label = 'Freight'
+            elif 'weight' == selected_feature:
+                feature = 'weight'
+                label = 'Weight'
+            else:
+                feature = 'freight'
+                label = 'Freight'
+        figure = class_object.comparison_line_plot(
+            feature=feature,
+        )
+        return figure, label
+    except Exception as e:
+        pass
+    
+
+
+@callback(
+    Output('depowise_yearly_comparison_graph', 'figure'),
+    Output('dropdown_depowise_goods_rake_wagon_weight', 'label'),
+    [Input('dropdown_depowise_goods_rake_wagon_weight', 'value'),
+  ],
+    prevent_initial_call=False,
+)
+def update_graph(dropdown_value):
+    try:
+        if dropdown_value is not None:
+            parts = dropdown_value.split('_')
+            selected_division=parts[-1]
+            selected_feature= '_'.join(parts[:-1])
             class_object = load_goods_page(selected_division)
             if 'rakes' in selected_feature:
                 feature = 'rakes'
@@ -401,50 +477,11 @@ def update_graph(dropdown_value):
             else:
                 feature = 'freight'
                 label = 'Freight'
-        figure = class_object.comparison_line_plot(
-            feature=feature,
-            current_year_df=class_object.current_year_monthwise_outward_data,
-            previous_year_df=class_object.previous_year_monthwise_outward_data,
-            target_df=class_object.division_target_df
-        )
-        return figure, label
+            figure = class_object.yearly_data_comparison_line_plot(
+                feature=feature)
+            return figure, label
     except Exception as e:
         pass
-    
-# @callback(
-#     Output('depowise_yearly_comparison_graph', 'figure'),
-#     Output('dropdown_goods_depowise_rake_wagon_weight', 'label'),
-#     [Input('dropdown_rakes_depowise', 'n_clicks'),
-#      Input('dropdown_wagons_depowise', 'n_clicks'),
-#      Input('dropdown_weight_depowise', 'n_clicks'),
-#      Input('dropdown_freight_depowise', 'n_clicks'),
-#       Input('dropdown_freight_depowise', 'header')]
-# )
-# def update_depowise_graph(n_clicks_rakes, n_clicks_wagons, n_clicks_weight,n_clicks_freight,selected_division):
-#     class_object = load_goods_page(selected_division)
-#     changed_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
-#     if 'dropdown_rakes_depowise' in changed_id:
-#         feature = 'rakes'
-#         label = "Rakes"
-#     elif 'dropdown_wagons_depowise' in changed_id:
-#         feature = 'wagon'
-#         label = 'Wagons'
-#     elif 'dropdown_freight_depowise' in changed_id:
-#         feature = 'freight'
-#         label = 'Freight'
-#     elif 'dropdown_weight_depowise' in changed_id:
-#         feature = 'weight'
-#         label = 'Weight'
-#     else:
-#         feature = 'freight'
-#         label = 'Freight'
-#     # Assuming you have defined the comparison_line_plot function
-#     figure = yearly_data_comparison_line_plot(
-#         feature=feature,
-#         current_year_df=class_object.current_year_depowise_df,
-#         previous_year_df=class_object.previous_year_depowise_df,
-#     )
-#     return figure, label
 
 
 
