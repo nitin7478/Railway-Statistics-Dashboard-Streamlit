@@ -1,12 +1,15 @@
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, Dash, dcc, dash_table
 import dash
-import json
+import json, os
 from pages import pune , sur , cr, passenger
 from pages.overview import update_overview_page 
 from pages.goods import update_goods_page
 from pages.passenger import update_passenger_page
+from pages.stations import update_stations_page
 from  src.constants.constants import *
+from pages.pune import update_pune_division_page
+from pages.other_coaching import update_other_coaching_page
 external_css = [dbc.themes.BOOTSTRAP]
 
 app = Dash(__name__, external_stylesheets=external_css,
@@ -20,7 +23,7 @@ navbar = dbc.NavbarSimple(
             label="Select Division",
             children=[
                 dbc.DropdownMenuItem("Pune", id='pune_div'),
-                dbc.DropdownMenuItem("Solapur", id='sur_div'),
+                # dbc.DropdownMenuItem("Solapur", id='sur_div'),
             ],
             className="me-md-4",
             id='division_dropdown',
@@ -28,13 +31,13 @@ navbar = dbc.NavbarSimple(
         dbc.Button("Overview", className="me-md-3", id='overview'),
         dbc.Button("Passenger", className="me-md-3", id='passenger'),
         dbc.Button("Goods", className="me-md-3", id='goods'),
-        dbc.Button("Parcel", className="me-md-3", disabled=True, id='parcel'),
-        dbc.Button("Other Coaching", className="me-md-3", disabled=True, id='other_coaching'),
-        dbc.Button("Stations", className="me-md-3", disabled=True, id='stations'),
+        # dbc.Button("Parcel", className="me-md-3", disabled=True, id='parcel'),
+        dbc.Button("Other Coaching", className="me-md-3", disabled=False, id='other_coaching'),
         dbc.Button("Achievements", className="me-md-3", disabled=True, id='achievements'),
         dbc.Button("Photo Gallery", className="me-md-3", disabled=True, id='photo_gallery'),
         dbc.Button("Planning", className="me-md-3", disabled=True, id='planning'),
-        dbc.Button("Contact Us", disabled=True, id='contact'),
+        dbc.Button("Stations", className="me-md-3", disabled=False, id='stations'),
+        dbc.Button("Contact Us",disabled=True, id='contact'),
     ],
     brand="Central Railway",
     brand_href="#",
@@ -43,11 +46,21 @@ navbar = dbc.NavbarSimple(
     fluid=True
 )
 
-app.layout = dbc.Container([
-    dbc.Row(navbar),
-    html.Div(id='page-content'),
-    dcc.Store(id='selected_division_session', storage_type='session'),
-], fluid=True)
+# Layout with spinner
+app.layout = html.Div([
+    dbc.Row(navbar),  # Navbar outside the loading component
+    dcc.Loading(
+        id="loading",
+        type="default",
+        children=html.Div([
+            dbc.Container([
+                html.Div(id='page-content'),
+                dcc.Store(id='selected_division_session', storage_type='session'),
+            ], fluid=True)
+        ]),
+        # style={"width": "100%", "height": "100%", "display": "flex", "align-items": "center", "justify-content": "center"},
+    ),
+])
 
 
 @app.callback(
@@ -56,29 +69,36 @@ app.layout = dbc.Container([
     Output(component_id='page-content', component_property='children'),
     [
         Input(component_id="pune_div", component_property="n_clicks"),
-        Input(component_id="sur_div", component_property="n_clicks"),
+        # Input(component_id="sur_div", component_property="n_clicks"),
         Input(component_id='overview', component_property='n_clicks'),
         Input(component_id='passenger', component_property='n_clicks'),
         Input(component_id='goods', component_property='n_clicks'),
-        Input(component_id='parcel', component_property='n_clicks'),
+        Input(component_id='other_coaching', component_property='n_clicks'),
         Input(component_id='achievements', component_property='n_clicks'),
         Input(component_id='photo_gallery', component_property='n_clicks'),
         Input(component_id='contact', component_property='n_clicks'),
+        Input(component_id='stations', component_property='n_clicks'),
     ],
-    State('selected_division_session', 'data')
+    State('selected_division_session', 'data'),
+    prevent_initial_call=False,
 )
-def update_dropdown(pune_clicks, sur_clicks, overview_clicks, coaching_clicks, goods_clicks, parcel_clicks, achievements_clicks, photo_gallery_clicks,
-        contact_clicks, state):
-    if pune_clicks or sur_clicks or overview_clicks or coaching_clicks or goods_clicks or parcel_clicks or achievements_clicks or photo_gallery_clicks or contact_clicks:
+def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks,other_coaching_clicks, achievements_clicks, photo_gallery_clicks,
+        contact_clicks,station_clicks, state):
+    if pune_clicks or overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or achievements_clicks or photo_gallery_clicks or contact_clicks or station_clicks:
         ctx = dash.callback_context
         if ctx.triggered_id:
             triggered_id = ctx.triggered_id.split('.')[0]
             if triggered_id == 'pune_div':
-                selected_division = 'Pune'
-                return selected_division, selected_division, pune.layout
-            elif triggered_id == 'sur_div':
-                selected_division = 'Solapur'
-                return selected_division, selected_division , sur.layout
+                selected_division = 'pune'
+                return 'Pune', selected_division, update_pune_division_page()
+            # elif triggered_id == 'sur_div':
+            #     selected_division = 'sur'
+            #     return 'Solapur', selected_division , sur.layout
+            elif triggered_id == 'stations':
+                label = "Select Division"
+                state = None
+                html_page= update_stations_page()
+                return  label, state , html_page
             if state is not None:
                 if triggered_id == 'overview':
                     html_page = update_overview_page(state)
@@ -89,24 +109,34 @@ def update_dropdown(pune_clicks, sur_clicks, overview_clicks, coaching_clicks, g
                 elif triggered_id == 'goods':
                     html_page = update_goods_page(state)
                     return state, state , html_page
-    elif state is not None:
-        html_page = update_overview_page(state)
+                elif triggered_id == 'other_coaching':
+                    html_page = update_other_coaching_page(state)
+                    return state, state , html_page
+            else:
+                layout = html.Div([
+                    dbc.Container([
+                        dbc.Row([
+                            dbc.Col([
+                                html.H2("Please Select Division")
+                            ], className="d-flex justify-content-center align-items-center" , style={'marginTop':20}),
+                        ],)
+                    ]),
+                ])
+                return "Select Division", None , layout
+    elif state is not None :
+        html_page = update_other_coaching_page(state)
         return state, state , html_page
-
     return "Select Division", None , cr.layout
+
+
 
 
 def update_page_for_division(selected_division):
     if selected_division == 'Pune':
-        return pune.layout
+        return update_overview_page('pune')
     if selected_division == 'Solapur':
         return sur.layout
 
-
-
-
-
-    
 
 if __name__ == '__main__':
     app.run_server(debug=True)

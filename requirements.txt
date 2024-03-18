@@ -4,3 +4,5 @@ python-dotenv
 pandas
 nbformat 
 xlsxwriter
+tabula
+tabula-py

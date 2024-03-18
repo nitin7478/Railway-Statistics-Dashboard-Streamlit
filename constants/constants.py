@@ -1,8 +1,0 @@
-# database na,es
-DB_DIVISION = 'division'
-DB_STATIONS = 'station'
-DB_DIVISION_EARNINGS_OVERVIEW= 'division_earnings'
-DB_DIVISION_TARGET_OVERVIEW = 'division_target'
-DB_DIVISION_GOODS_MONTHEWISE_YEARWISE_OW = 'division_goods_monthwise_outward'
-DB_DIVISION_GOODS_DEPOWISE_YEARWISE_OW = 'division_goods_depowise_yearly_earning'
-DB_DIVISION_GOODS_COMMODITY_YEARWISE_OW = 'division_goods_commodity_outward'

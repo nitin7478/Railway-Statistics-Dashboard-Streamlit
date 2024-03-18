@@ -1,56 +1,73 @@
-from dash import Dash, html, dcc , Input , Output, callback
-import dash_bootstrap_components as dbc
 import dash
-
-# Use flatly theme
-external_css = [dbc.themes.CERULEAN]
-
-app = Dash(__name__, pages_folder='pages', use_pages=True, external_stylesheets=external_css,
-           meta_tags=[{'name': 'viewport', 'content': 'width=device-width, initial-scale=1.0'}])
-
-page_order = ['/pune', '/sur', '/csmt', '/ngp', '/bsl', '/contact']
-# Navbar component
+# import dash_core_components as dcc
+import pdfkit
+from flask import Flask, make_response
+from dash import dcc, html , Input , Output
 
 
-navbar = dbc.Navbar(
-    [
-        html.A('Central Railway', href="/pune",
-               className="container navbar-brand"),
-        dbc.Nav(
-            [
-                dbc.NavItem(
-                    dcc.Link(
-                        page['name'],
-                        href=page["relative_path"],
-                        className="nav-link",
-                        # Add margin to increase space between NavItems
-                        style={"margin-right": "20px", 'width': '150px'},
-                    )
-                )
-                for page_path in page_order
-                for page in dash.page_registry.values()
-                if page['relative_path'] == page_path and page['relative_path']
-            ],
-            fill=True,  # Add fill parameter to stretch items to the right
-            navbar=True,
-            className='navbar-nav  me-auto',
-        ),
-    ],
-    className='navbar navbar-expand-lg fixed-top bg-primary',
-    color="dark",
-    dark=True,
-)
+app = dash.Dash()
+server = app.server  # Flask server
 
-# App layout
-app.layout = dbc.Container([html.Div([
-    navbar,  # Include the navbar
-    html.Div(children=[
-        dash.page_container
-    ], style={'marginTop': '100px'})
+# Define your Dash app layout
+app.layout = html.Div([ 
+        html.Div('Hello'),
+        dbc.Button('CREAT PDF', id='run'),
+        html.Div(id='hel'),
+    # html.Div(id='pdf-download')
+    ])
 
-])
-])
+# @app.callback(
+#     Output('pdf-download', 'children'),
+#     Input('btn-download-pdf', 'n_clicks')
+# )
+# def download_pdf(n_clicks):
+#     if n_clicks:
+#         return None
 
+
+app.clientside_callback(
+        '''
+        function (n_clicks) {
+            if (n_clicks > 0) {
+                var doc = new PDFDocument({layout:'landscape', margin: 25});
+                var stream = doc.pipe(blobStream());
+                
+                doc.fontSize(28);
+                doc.font('Helvetica-Bold');
+                doc.text('Example'.toUpperCase(), 15, 40);
+                doc.addPage().fontSize(28);
+                doc.text('Showing that multiple pages work');
+                doc.end();
+
+                var saveData = (function () {
+                    var a = document.createElement("a");
+                    document.body.appendChild(a);
+                    a.style = "display: none";
+                    return function (blob, fileName) {
+                        var url = window.URL.createObjectURL(blob);
+                        a.href = url;
+                        a.download = fileName;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    };
+                }());
+                
+                stream.on('finish', function() {
+                
+                  var blob = stream.toBlob('application/pdf');
+                  saveData(blob, 'Report.pdf');
+                
+                    // iframe.src = stream.toBlobURL('application/pdf');
+                });
+            }
+            return false;
+        }
+        ''',
+        Output('hel', 'children'),
+        [
+            Input('run', 'n_clicks'),
+        ]
+    )
 
 if __name__ == '__main__':
     app.run_server(debug=True)

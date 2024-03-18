@@ -152,16 +152,17 @@ class plot_passenger_graphs:
 
         # Add pie charts to the subplots
         fig.add_trace(go.Pie(values=values, labels=names,
-                            title=f'CY : Revenue',
+                            title=f"<br>".join(textwrap.wrap('CY : Revenue',width=7, )),
                             textinfo='label+percent',
                             showlegend=False,insidetextorientation='radial'),
                             row=1, col=1)
         fig.add_trace(go.Pie(values=values_ly, labels=names_ly,
-                            title=f'LY : Revenue ',
+                            title=f"<br>".join(textwrap.wrap('LY : Revenue',width=7, )),
                             textinfo='label+percent',
                             showlegend=False,insidetextorientation='radial'),
                             row=2, col=1)
-        fig.update_traces(hole=.8, hoverinfo="label+percent+name+value")
+        fig.update_traces(hole=.8, hoverinfo="label+percent+name+value",  textfont_size=11.5,
+                          titlefont_size=18,)
         fig.update_layout(
             margin=dict(t=0, b=0,r=0),
             legend=dict(
@@ -177,7 +178,7 @@ class plot_passenger_graphs:
                 bordercolor='rgba(0, 0, 0, 0.5)',  # Border color of the legend
                 borderwidth=1,  # Border width of the legend
                 orientation='v',
-                title_font=dict(size=16),
+                # title_font=dict(size=16),
             ),
             )
         return fig
@@ -185,107 +186,119 @@ class plot_passenger_graphs:
 
 
 def update_passenger_page(selected_division):
-    class_object = plot_passenger_graphs(selected_division=selected_division)
-    layout = dbc.Container([
-        dbc.Row([
-            dbc.Col([
-                dbc.Row([
-                    dbc.Col([
-                        dcc.Dropdown(
-                        id='dropdown_total_revenue',
-                        options=[
-                            {'label': 'Total Revenue', 'value': f"total_pass_{selected_division}"},
-                            {'label': 'Sub-Urban Revenue', 'value': f"uts_sub_urban_pass_{selected_division}"},
-                            {'label': 'Non-Sub Urban Revenue', 'value': f"non_sub_urban_revenue_{selected_division}"}
-                        ],
-                        value=f"total_pass_{selected_division}", 
-                        # placeholder="Select Type",# default value
-                        clearable=False,
-                    ),
-                    ],width=4, xs=12, sm=12, md=4, lg=4, xl=4),
-                    dbc.Col([
-                        
-                    ],
-                    width=4, xs=12, sm=12, md=4, lg=4, xl=4,
-                    className="border-secondary border rounded text-center fw-bold",
-                    id="cy_daily_avg_revenue"),
-                    dbc.Col([
-                        
-                    ],
-                    width=4, xs=12, sm=12, md=4, lg=4, xl=4,
-                    className="border-secondary border rounded fw-bold",
-                    id="cy_monthly_avg_revenue"),
-                    
-                ],className="m-1"),
-                
-                dcc.Graph(
-                    id='compare_pass_rv',
-                    config={
-                        'displayModeBar': False
-                        },
-                    # style={'position': 'relative', 'width': '100%', 'height': '100%'}
-                )
-                ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,
-                className="border-secondary border rounded"),
-                dbc.Col([
-                    dcc.Graph(
-                        figure=class_object.plot_pie_chart(),
-                        id="pie_pass_revenue_comparison",
-                        config={
-                        'displayModeBar': False
-                        },
-                    )
-                ], width=2, xs=12, sm=12, md=2, lg=2, xl=2,className="border-secondary border rounded"),
+    if selected_division is not None:
+        class_object = plot_passenger_graphs(selected_division=selected_division)
+        layout = dbc.Container([
+            dbc.Row([
                 dbc.Col([
                     dbc.Row([
-                    dbc.Col([
-                     dcc.Dropdown(
-                        id='dropdown_total_pass_traffic',
-                        options=[
-                            {'label': 'Total Passenger', 'value': f"total_passengers_{selected_division}"},
-                            {'label': 'Sub-Urban Passenger', 'value': f"sub_passengers_{selected_division}"},
-                            {'label': 'Non-Sub Urban Passenger', 'value': f"non_sub_passengers_{selected_division}"}
+                        dbc.Col([
+                            dcc.Dropdown(
+                            id='dropdown_total_revenue',
+                            options=[
+                                {'label': 'Total Revenue', 'value': f"total_pass_{selected_division}"},
+                                {'label': 'Sub-Urban Revenue', 'value': f"uts_sub_urban_pass_{selected_division}"},
+                                {'label': 'Non-Sub Urban Revenue', 'value': f"non_sub_urban_revenue_{selected_division}"}
+                            ],
+                            value=f"total_pass_{selected_division}", 
+                            # placeholder="Select Type",# default value
+                            clearable=False,
+                        ),
+                        ],width=4, xs=12, sm=12, md=4, lg=4, xl=4),
+                        dbc.Col([
+                            
                         ],
-                        value=f"total_passengers_{selected_division}", 
-                        # placeholder="Select Type",# default value
-                        clearable=False,
-                    ),
-                    ],width=4, xs=12, sm=12, md=4, lg=4, xl=4),
-                    dbc.Col([
-                    ],
-                    width=4, xs=12, sm=12, md=4, lg=4, xl=4,
-                    className="border-secondary border rounded fw-bold",
-                    id="cy_daily_avg_pass"),
-                    dbc.Col([
+                        width=4, xs=12, sm=12, md=4, lg=4, xl=4,
+                        className="border-secondary border rounded text-center fw-bold",
+                        id="cy_daily_avg_revenue"),
+                        dbc.Col([
+                            
+                        ],
+                        width=4, xs=12, sm=12, md=4, lg=4, xl=4,
+                        className="border-secondary border rounded fw-bold",
+                        id="cy_monthly_avg_revenue"),
                         
-                    ],
-                    width=4, xs=12, sm=12, md=4, lg=4, xl=4,
-                    className="border-secondary border rounded fw-bold",
-                    id="cy_monthly_avg_pass"),
+                    ],className="m-1"),
                     
-                    ], className='m-1'),
-                    dcc.Graph (
-                        id='passenger_traffic_trend_comparison',
+                    dcc.Graph(
+                        id='compare_pass_rv',
                         config={
-                        'displayModeBar': False
-                        },
+                            'displayModeBar': False
+                            },
                         # style={'position': 'relative', 'width': '100%', 'height': '100%'}
                     )
-                ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,
-                className="border-secondary border rounded"),
+                    ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,
+                    className="border-secondary border rounded"),
+                    dbc.Col([
+                        dcc.Graph(
+                            figure=class_object.plot_pie_chart(),
+                            id="pie_pass_revenue_comparison",
+                            config={
+                            'displayModeBar': False
+                            },
+                        )
+                    ], width=2, xs=12, sm=12, md=2, lg=2, xl=2,className="border-secondary border rounded"),
+                    dbc.Col([
+                        dbc.Row([
+                        dbc.Col([
+                        dcc.Dropdown(
+                            id='dropdown_total_pass_traffic',
+                            options=[
+                                {'label': 'Total Passenger', 'value': f"total_passengers_{selected_division}"},
+                                {'label': 'Sub-Urban Passenger', 'value': f"sub_passengers_{selected_division}"},
+                                {'label': 'Non-Sub Urban Passenger', 'value': f"non_sub_passengers_{selected_division}"}
+                            ],
+                            value=f"total_passengers_{selected_division}", 
+                            # placeholder="Select Type",# default value
+                            clearable=False,
+                        ),
+                        ],width=4, xs=12, sm=12, md=4, lg=4, xl=4),
+                        dbc.Col([
+                        ],
+                        width=4, xs=12, sm=12, md=4, lg=4, xl=4,
+                        className="border-secondary border rounded fw-bold",
+                        id="cy_daily_avg_pass"),
+                        dbc.Col([
+                            
+                        ],
+                        width=4, xs=12, sm=12, md=4, lg=4, xl=4,
+                        className="border-secondary border rounded fw-bold",
+                        id="cy_monthly_avg_pass"),
+                        
+                        ], className='m-1'),
+                        dcc.Graph (
+                            id='passenger_traffic_trend_comparison',
+                            config={
+                            'displayModeBar': False
+                            },
+                            # style={'position': 'relative', 'width': '100%', 'height': '100%'}
+                        )
+                    ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,
+                    className="border-secondary border rounded"),
 
-        ], className="flex"),
-        
-        dbc.Row([
-            dbc.Col([
-                dash_table.DataTable(data=class_object.full_dataframe.to_dict('records'),)
-                                    #   columns=[i for i in class_object.full_dataframe.columns])
-                ], width= 12, xs=12 , sm=12, md=12 , lg=12, xl=12,className="border-secondary border rounded",
-                    id='dash_table_for_passenger_data'),
-            ], className='flex'),
-    ], fluid=True,
-    className="m-1")
-    return layout
+            ], className="flex"),
+            
+            # dbc.Row([
+            #     dbc.Col([
+            #         dash_table.DataTable(data=class_object.full_dataframe.to_dict('records'),)
+            #                             #   columns=[i for i in class_object.full_dataframe.columns])
+            #         ], width= 12, xs=12 , sm=12, md=12 , lg=12, xl=12,className="border-secondary border rounded",
+            #             id='dash_table_for_passenger_data'),
+            #     ], className='flex'),
+        ], fluid=True,
+        className="m-1")
+        return layout
+    else:
+        layout = html.Div([
+                    dbc.Container([
+                        dbc.Row([
+                            dbc.Col([
+                                html.H2("Please Select Division")
+                            ], className="d-flex justify-content-center align-items-center" , style={'marginTop':20}),
+                        ],)
+                    ]),
+                ])
+        return layout
 
 
 @callback(
