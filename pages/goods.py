@@ -81,8 +81,8 @@ class load_goods_page:
             )
 
 
-        monthly_avg_current = current_year_df[feature].mean()
-        daily_avg_current = monthly_avg_current / 30
+        monthly_avg_current = round(current_year_df[feature].mean(),2)
+        daily_avg_current = round(monthly_avg_current / 30,2)
 
         # Update figure layout
         fig.update_layout(
@@ -113,7 +113,7 @@ class load_goods_page:
 
         fig.update_xaxes(showline=True, linewidth=2, linecolor='black',)
 
-        return fig
+        return fig , daily_avg_current , monthly_avg_current
 
     def yearly_data_comparison_line_plot(self,feature):
         
@@ -163,7 +163,7 @@ class load_goods_page:
                 traceorder='normal',  # Order of the legend items
                 font=dict(
                     family='sans-serif',
-                    size=14,
+                    size=15,
                     color='black'
                 ),
                 bgcolor='rgba(255, 255, 255, 0.5)',  # Background color of the legend
@@ -217,8 +217,9 @@ class load_goods_page:
                             textinfo='label+percent',
                             showlegend=False,insidetextorientation='radial'),
                             row=2, col=1)
-        fig.update_traces(hole=.8, hoverinfo="label+percent+name+value",  textfont_size=11.5,
+        fig.update_traces(hole=.8, hoverinfo="label+percent+name+value",  textfont_size=14,
                           titlefont_size=18,)
+        
         fig.update_layout(
             margin=dict(t=0, b=0,r=0),
             legend=dict(
@@ -227,7 +228,7 @@ class load_goods_page:
                 traceorder='normal',  # Order of the legend items
                 font=dict(
                     family='sans-serif',
-                    size=10,
+                    size=15,
                     color='black'
                 ),
                 bgcolor='rgba(255, 255, 255, 0.5)',  # Background color of the legend
@@ -304,19 +305,38 @@ def update_goods_page(selected_division):
         layout =dbc.Container([
             dbc.Row([
                 dbc.Col([
-                    dcc.Dropdown(
-                        id='dropdown_goods_rake_wagon_weight',  # This ID is for the dropdown itself, not individual items
-                        options=[
-                            {'label': 'Freight', 'value': f"freight_{selected_division}"},
-                            {'label': 'Rakes', 'value': f"rakes_{selected_division}"},
-                            {'label': 'Wagons', 'value': f"wagons_{selected_division}"},
-                            {'label': 'Weight', 'value': f"weight_{selected_division}"}
-                        ],
-                        placeholder="Select Type",
-                        clearable=False,
-                        value= f"freight_{selected_division}",
-                        className="",  
-                    ),
+                    dbc.Row([
+                        dbc.Col([
+                            dcc.Dropdown(
+                            id='dropdown_goods_rake_wagon_weight',  # This ID is for the dropdown itself, not individual items
+                            options=[
+                                {'label': 'Freight', 'value': f"freight_{selected_division}"},
+                                {'label': 'Rakes', 'value': f"rakes_{selected_division}"},
+                                {'label': 'Wagons', 'value': f"wagons_{selected_division}"},
+                                {'label': 'Weight', 'value': f"weight_{selected_division}"}
+                            ],
+                            placeholder="Select Type",
+                            clearable=False,
+                            value= f"freight_{selected_division}",
+                            className="",  
+                            ),
+                        ],xs=12, sm=12, md=4, lg=4, xl=4),
+                        dbc.Col([
+                            html.Div(
+                                     id="cy_daily_avg_freight")
+                            ],
+                            width=4, xs=12, sm=12, md=4, lg=4, xl=4,
+                            className="border-secondary border rounded text-center fs-6",
+                            ),
+                        dbc.Col([
+                            html.Div(
+                                     id="cy_monthly_avg_freight")
+                            ],
+                            width=4, xs=12, sm=12, md=4, lg=4, xl=4,
+                            className="border-secondary border rounded text-center fs-6",
+                        ),
+                    ]),
+    
                     dcc.Graph (
                         
                         id='rake_wgn_wt_compare_graph',
@@ -324,7 +344,7 @@ def update_goods_page(selected_division):
                         'displayModeBar': False
                         },
                     )
-                ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,className="border-secondary border rounded"),
+                ], width=5, xs=12, sm=12, md=12, lg=12, xl=5,className="border-secondary border rounded"),
                 dbc.Col([
                     dcc.Graph(
                         figure=class_object.plot_pie_chart(),
@@ -333,7 +353,7 @@ def update_goods_page(selected_division):
                         'displayModeBar': False
                         },
                     )
-                ], width=2, xs=12, sm=12, md=2, lg=2, xl=2,className="border-secondary border rounded"),
+                ], width=2, xs=12, sm=12, md=12, lg=12, xl=2,className="border-secondary border rounded"),
                 dbc.Col([
                      dcc.Dropdown(
                         id='dropdown_depowise_goods_rake_wagon_weight',  # This ID is for the dropdown itself, not individual items
@@ -356,37 +376,37 @@ def update_goods_page(selected_division):
                         },
                         # style={'position': 'relative', 'width': '100%', 'height': '100%'}
                     )
-                ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,className="border-secondary border rounded"),
+                ], width=5, xs=12, sm=12, md=12, lg=12, xl=5,className="border-secondary border rounded"),
                 
             ], className="flex"),
-            dbc.Row([
-                dbc.Col([
-                    dcc.Graph(
-                        figure = class_object.plot_trend_line('freight'),
-                        id = "Revenue Trend Over Time",
-                        config={
-                        'displayModeBar': False
-                        },
-                    ),
-                ],
-                width=6,xs=12, sm=12, md=12, lg=6, xl=6,
-                className="border-secondary border rounded"),
-                dbc.Col([
+            # dbc.Row([
+            #     dbc.Col([
+            #         dcc.Graph(
+            #             figure = class_object.plot_trend_line('freight'),
+            #             id = "Revenue Trend Over Time",
+            #             config={
+            #             'displayModeBar': False
+            #             },
+            #         ),
+            #     ],
+            #     width=6,xs=12, sm=12, md=12, lg=6, xl=6,
+            #     className="border-secondary border rounded"),
+            #     dbc.Col([
 
-                    dcc.Graph(
+            #         dcc.Graph(
                      
-                    )
-                ],
-                width=3,xs=12, sm=12, md=3, lg=3, xl=3,
-                className="border-secondary border rounded"),
-                dbc.Col([
-                    dcc.Graph(
+            #         )
+            #     ],
+            #     width=3,xs=12, sm=12, md=3, lg=3, xl=3,
+            #     className="border-secondary border rounded"),
+            #     dbc.Col([
+            #         dcc.Graph(
                         
-                    )
-                ],
-                width=3,xs=12, sm=12, md=3, lg=3, xl=3,
-                className="border-secondary border rounded"),
-            ], className='flex'),
+            #         )
+            #     ],
+            #     width=3,xs=12, sm=12, md=3, lg=3, xl=3,
+            #     className="border-secondary border rounded"),
+            # ], className='flex'),
             # dbc.Row([
             #     dbc.Col([
             #         dbc.Row([
@@ -433,6 +453,8 @@ def update_goods_page(selected_division):
 @callback(
     Output('rake_wgn_wt_compare_graph', 'figure'),
     Output('dropdown_goods_rake_wagon_weight', 'label'),
+    Output('cy_daily_avg_freight', 'children'),
+    Output('cy_monthly_avg_freight', 'children'),
     [Input('dropdown_goods_rake_wagon_weight', 'value'),
      ],
     prevent_initial_call=False,
@@ -459,10 +481,12 @@ def update_graph(dropdown_value):
             else:
                 feature = 'freight'
                 label = 'Freight'
-        figure = class_object.comparison_line_plot(
+        figure,daily_avg_current, monthly_avg_current = class_object.comparison_line_plot(
             feature=feature,
         )
-        return figure, label
+        daily_avg_current = f"CY Daily Avg : {daily_avg_current}"
+        monthly_avg_current = f"CY Month Avg : {monthly_avg_current}"
+        return figure, label, daily_avg_current,monthly_avg_current
     except Exception as e:
         pass
     

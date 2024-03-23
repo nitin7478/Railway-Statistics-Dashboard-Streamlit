@@ -21,232 +21,59 @@ html.Script(src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2p
 
 def update_overview_page(selected_division):
     if selected_division is not None:
+        
+        selected_division =  f"{selected_division[:1].upper()}{selected_division[1:]}"
         class_object = overview_graphs_buttons(selected_division=selected_division)
-        card_style = {
-            'overflowY': 'auto',
-            'minHeight':'242px'# Add vertical scrolling if content exceeds the card height
-        }
+        # card_style = {
+        #     # 'minHeight':'242px',
+        #     'backgroundColor': '#e1e7f0'
+        # }
+        
+        def percentage_variation(current_value, previous_value):
+            if previous_value != 0:
+                return round(((current_value - previous_value) / previous_value) * 100, 2)
+            else:
+                return 0
 
+        def generate_revenue_card(title, current_value, previous_value, target_value):
+            percentage_vs_ly = percentage_variation(current_value, previous_value)
+            percentage_vs_tgt = percentage_variation(current_value, target_value)
+            if title == 'Originating Pass':
+                label = 'Mil'
+            else:
+                label = 'Cr'
+            return dbc.Col([
+                dbc.Card([
+                    dbc.CardHeader(title, className="fs-5", style={'backgroundColor': '#bff2eb', 'fontWeight':'500', 'minHeight':'80px'}),
+                    dbc.CardBody([
+                        html.H5(f"{round(current_value, 2)} {label}", className="card-title"),
+                    ], className="border-start border-success border-3", style={'minHeight':'20px'}),
+                    dbc.CardFooter([
+                        html.Div([
+                            html.I(f"vs LY :: {round(previous_value, 2)} :: "),
+                            html.I(f"{percentage_vs_ly}% ", className=f"me-2 {'text-success' if current_value > previous_value else 'text-danger'}")
+                        ]),
+                        html.Div([
+                            html.I("vs TGT :: "),
+                            html.I(f"{round(target_value, 2)} :: "),
+                            html.I(f"{percentage_vs_tgt}%", className=f" me-2 {'text-success' if current_value > target_value else 'text-danger'}")
+                        ])
+                    ],style={'backgroundColor': '#f8f9fa', 'minHeight':'100px'},),
+                ], className="text-center m-1"),
+            ], width=2, xs=12, sm=12, md=12, lg=4, xl=2)
+        
         layout = html.Div([ 
                     html.Script(src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js'),
                     dbc.Container([
             dbc.Row([
-                    dbc.Col([
-                        dbc.Card([
-                            dbc.CardBody(
-                                [
-                                    html.H6(f"{selected_division} Division Revenue",
-                                            className="fs-5"),
-                                            # html.I("In crores"),
-                                    html.H5(
-                                        [
-                                            f"{round(class_object.division_current_gross_total_revenue,2)} Cr",
-                                        ],
-                                        className="text-primary",
-                                    ),
-                                    html.Div([
-                                        html.I(f"vs LY :: {round(class_object.division_previous_gross_total_revenue, 2)} :: "),
-                                        html.I(f"{round(((class_object.division_current_gross_total_revenue - class_object.division_previous_gross_total_revenue) / class_object.division_previous_gross_total_revenue) * 100, 2)}% ",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_gross_total_revenue > class_object.division_previous_gross_total_revenue else 'text-danger'}")
-                                    ]),
-
-                                    html.Div([
-                                        html.I("vs TGT :: "),
-                                        html.I(f"{round(class_object.division_current_year_target_revenue, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_gross_total_revenue - class_object.division_current_year_target_revenue) / class_object.division_current_year_target_revenue) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_gross_total_revenue > class_object.division_current_year_target_revenue else 'text-danger'}"
-                                        )
-                                    ], ),
-                                                            
-        
-                                ], className="border-start border-success border-5"
-                            ),
-                        ], className="text-center m-1",
-                        style=card_style),
-                            ], width=2 , xs=12 , sm=12, md=6, lg=4 , xl=2),
-                    dbc.Col([
-                        dbc.Card([
-                            dbc.CardBody(
-                                [
-                                    html.H6(f"Passenger Revenue",
-                                            className="fs-5"),
-                                    html.H5(
-                                        [
-                                            f"{round(class_object.division_current_passenger_earning_revenue,2)} Cr",
-                                        ],
-                                        className="",
-                                    ),
-                                html.Div([
-                                            html.I("vs LY :: "),
-                                            html.I(f"{round(class_object.division_previous_passenger_earning_revenue, 2)} :: "),
-                                            html.I(
-                                                f"{round(((class_object.division_current_passenger_earning_revenue - class_object.division_previous_passenger_earning_revenue) / class_object.division_previous_passenger_earning_revenue) * 100, 2)}%",
-                                                className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_passenger_earning_revenue > class_object.division_previous_passenger_earning_revenue else 'text-danger'}"
-                                            )
-                                        ]),
-                                    html.Div([
-                                            html.I("vs TGT :: "),
-                                            html.I(f"{round(class_object.division_current_year_target_passenger_earning_revenue, 2)} :: "),
-                                            html.I(
-                                                f"{round(((class_object.division_current_passenger_earning_revenue - class_object.division_current_year_target_passenger_earning_revenue) / class_object.division_current_year_target_passenger_earning_revenue) * 100, 2)}%",
-                                                className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_passenger_earning_revenue > class_object.division_current_year_target_passenger_earning_revenue else 'text-danger'}"
-                                            )
-                                        ]),
-                                ], className="border-start border-success border-5"
-                            ),
-                        ], className="text-center m-1",
-                            style=card_style),
-                    ], width=2 , xs=12 , sm=12, md=6, lg=4 , xl=2),
-                    dbc.Col([
-                        dbc.Card([
-                            dbc.CardBody(
-                                [
-                                    html.H6(f"Goods Revenue",
-                                            className="fs-5"),
-                                    # html.I("In crores"),
-                                    html.H5(
-                                        [
-                                            f"{round(class_object.division_current_year_goods_revenue,2) } Cr",
-                                        ],
-                                        className="",
-                                    ),
-                                html.Div([
-                                        html.I("vs LY :: "),
-                                        html.I(f"{round(class_object.division_previous_year_goods_revenue, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_year_goods_revenue - class_object.division_previous_year_goods_revenue) / class_object.division_previous_year_goods_revenue) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_year_goods_revenue > class_object.division_previous_year_goods_revenue else 'text-danger'}"
-                                        )
-                                    ]),
-
-                                html.Div([
-                                        html.I("vs TGT :: "),
-                                        html.I(f"{round(class_object.division_current_year_target_goods_revenue, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_year_goods_revenue - class_object.division_current_year_target_goods_revenue) / class_object.division_current_year_target_goods_revenue) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_year_goods_revenue > class_object.division_current_year_target_goods_revenue else 'text-danger'}"
-                                        )
-                                    ]),
-                                ], className="border-start border-success border-5"
-                            ),
-                        ], className="text-center m-1",
-                                style=card_style),
-                    ], width=2 , xs=12 , sm=12, md=6, lg=4 , xl=2),
-                    dbc.Col([
-                        dbc.Card([
-                            dbc.CardBody(
-                                [
-                                    html.H6(f"Other Cog Revenue",
-                                            className="fs-5"),
-                                    # html.I("In crores"),
-                                    html.H5(
-                                        [
-                                            f"{round(class_object.division_current_year_other_coaching_revenue,2) } Cr",
-                                        ],
-                                        className="",
-                                    ),
-                                    html.Div([
-                                        html.I("vs LY :: "),
-                                        html.I(f"{round(class_object.division_previous_year_other_coaching_revenue, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_year_other_coaching_revenue - class_object.division_previous_year_other_coaching_revenue) / class_object.division_previous_year_other_coaching_revenue) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_year_other_coaching_revenue > class_object.division_previous_year_other_coaching_revenue else 'text-danger'}"
-                                        )
-                                    ]),
-
-                                    html.Div([
-                                        html.I("vs TGT :: "),
-                                        html.I(f"{round(class_object.division_current_year_target_other_coaching_revenue, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_year_other_coaching_revenue - class_object.division_current_year_target_other_coaching_revenue) / class_object.division_current_year_target_other_coaching_revenue) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_year_other_coaching_revenue > class_object.division_current_year_target_other_coaching_revenue else 'text-danger'}"
-                                        )
-                                    ],),
-                                    
-        
-                                ], className="border-start border-success border-5"
-                            ),
-                        ], className="text-center m-1",
-                                style=card_style),
-                    ], width=2 , xs=12 , sm=12, md=6, lg=4 , xl=2),
-                    dbc.Col([
-                        dbc.Card([
-                            dbc.CardBody(
-                                [
-                                    html.H6(f"Sundry Revenue",
-                                            className="fs-5"),
-                                    # html.I("In crores"),
-                                    html.H5(
-                                        [
-                                            f"{round(class_object.division_current_year_sundry_revenue,2) } Cr",
-                                        ],
-                                        className="",
-                                    ),
-                                    html.Div([
-                                        html.I("vs LY :: "),
-                                        html.I(f"{round(class_object.division_previous_year_sundry_revenue, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_year_sundry_revenue - class_object.division_previous_year_sundry_revenue) / class_object.division_previous_year_sundry_revenue) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_year_sundry_revenue > class_object.division_previous_year_sundry_revenue else 'text-danger'}"
-                                        )
-                                    ]),
-
-                                    html.Div([
-                                        html.I("vs TGT :: "),
-                                        html.I(f"{round(class_object.division_current_year_target_sundry_revenue, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_year_sundry_revenue - class_object.division_current_year_target_sundry_revenue) / class_object.division_current_year_target_sundry_revenue) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_year_sundry_revenue > class_object.division_current_year_target_sundry_revenue else 'text-danger'}"
-                                        )
-                                    ]),
-                                    
-        
-                                ], className="border-start border-success border-5"
-                            ),
-                        ], className="text-center m-1",
-                                style=card_style),
-                    ], width=2 , xs=12 , sm=12, md=6, lg=4 , xl=2),
-                    dbc.Col([
-                        dbc.Card([
-                            dbc.CardBody(
-                                [
-                                    html.H6(f"Origininating Pass",
-                                            className="fs-5"),
-                                    # html.I("In Millions"),
-                                    html.H5(
-                                        [
-                                            f"{round(class_object.division_current_year_originating_pass,2) } Millions",
-                                        ],
-                                        className="",
-                                    ),
-                                    html.Div([
-                                        html.I("vs LY :: "),
-                                        html.I(f"{round(class_object.division_previous_year_originating_pass, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_year_originating_pass - class_object.division_previous_year_originating_pass) / class_object.division_previous_year_originating_pass) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_year_originating_pass > class_object.division_previous_year_originating_pass else 'text-danger'}"
-                                        )
-                                    ]),
-
-                                    html.Div([
-                                        html.I("vs TGT :: "),
-                                        html.I(f"{round(class_object.division_current_year_target_originating_pass, 2)} :: "),
-                                        html.I(
-                                            f"{round(((class_object.division_current_year_originating_pass - class_object.division_current_year_target_originating_pass) / class_object.division_current_year_target_originating_pass) * 100, 2)}%",
-                                            className=f"bi bi-caret-up-fill me-2 {'text-success' if class_object.division_current_year_originating_pass > class_object.division_current_year_target_originating_pass else 'text-danger'}"
-                                        )
-                                    ],),
-
-                                    
-        
-                                ], className="border-start border-success border-5"
-                            ),
-                        ], className="text-center m-1",
-                                style=card_style),
-                    ], width=2 , xs=12 , sm=12, md=6, lg=4 , xl=2),
-
-                                    ], className='flex'),
+                    generate_revenue_card("Pune Division Revenue", class_object.division_current_gross_total_revenue, class_object.division_previous_gross_total_revenue, class_object.division_current_year_target_revenue),
+                    generate_revenue_card("Passenger Revenue", class_object.division_current_passenger_earning_revenue, class_object.division_previous_passenger_earning_revenue, class_object.division_current_year_target_passenger_earning_revenue),
+                    generate_revenue_card("Goods Revenue", class_object.division_current_year_goods_revenue, class_object.division_previous_year_goods_revenue, class_object.division_current_year_target_goods_revenue),
+                    generate_revenue_card("Other Cog Revenue", class_object.division_current_year_other_coaching_revenue, class_object.division_previous_year_other_coaching_revenue, class_object.division_current_year_target_other_coaching_revenue),
+                    generate_revenue_card("Sundry Revenue", class_object.division_current_year_sundry_revenue, class_object.division_previous_year_sundry_revenue, class_object.division_current_year_target_sundry_revenue),
+                    generate_revenue_card("Originating Pass", class_object.division_current_year_originating_pass, class_object.division_previous_year_originating_pass, class_object.division_current_year_target_originating_pass),
+               
+                    ], className='flex'),
             dbc.Row([
                 dbc.Col(
                     [ 
@@ -258,7 +85,8 @@ def update_overview_page(selected_division):
                         ),
                         html.Button("Download Full Data", id="btn-download", value=selected_division ),
                         dcc.Download(id="download-data"),
-                    ],  xs=12 , sm=12, md=12 , lg=5, xl=5,className="border-secondary border rounded "
+                    ],  xs=12 , sm=12, md=12 , lg=12, xl=5,
+                    className="border-secondary border rounded ",
                 ),
                 dbc.Col([
                         dcc.Graph(
@@ -268,7 +96,7 @@ def update_overview_page(selected_division):
                             'displayModeBar': False                 
                             },
                         )
-                    ], xs=12, sm=12, md=12, lg=2, xl=2,className="border-secondary border rounded"),
+                    ], xs=12, sm=12, md=12, lg=12, xl=2,className="border-secondary border rounded"),
                 dbc.Col(
                     [
                         dcc.Graph(
@@ -277,7 +105,7 @@ def update_overview_page(selected_division):
                             'displayModeBar': False
                             },
                         )
-                    ],xs=12 , sm=12, md=12 , lg=5, xl=5,className="border-secondary border rounded"
+                    ],xs=12 , sm=12, md=12 , lg=12, xl=5,className="border-secondary border rounded"
                 ),
             ], className='flex'),
             dbc.Row([
@@ -478,7 +306,7 @@ class overview_graphs_buttons:
     
 
     def draw_revenue_trend_lines(self):
-        earnings_df = self.cy_dataframe_upto_current_month
+        earnings_df = self.full_dataframe
         earnings_df = earnings_df.sort_values(by='earning_month')
         
         # Create a figure with subplots
@@ -560,15 +388,16 @@ class overview_graphs_buttons:
         fig.add_trace(go.Pie(values=values, labels=names,
                             title=f"<br>".join(textwrap.wrap('CY : Revenue',width=7, )),
                             textinfo='label+percent',
-                            showlegend=False,insidetextorientation='radial'),
+                            showlegend=False,rotation=50),
                             row=1, col=1)
         fig.add_trace(go.Pie(values=values_ly, labels=names_ly,
                             title=f"<br>".join(textwrap.wrap('LY : Revenue',width=7, )),
                             textinfo='label+percent',
-                            showlegend=False,insidetextorientation='radial'),
+                            showlegend=False,rotation=40),
                             row=2, col=1)
-        fig.update_traces(hole=.8, hoverinfo="label+percent+name+value",  textfont_size=11.5,
-                          titlefont_size=18,)
+        fig.update_traces(hole=.8, hoverinfo="label+percent+name+value",  textfont_size=15,
+                          titlefont_size=18,
+                         )
         fig.update_layout(
             # title = "<br>".join(textwrap.wrap('Revenue Distribution',width=12)),
             # title_x = 0.2,

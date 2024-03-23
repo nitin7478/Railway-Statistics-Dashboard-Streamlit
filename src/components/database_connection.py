@@ -86,8 +86,8 @@ class handle_database:
                 self.cy_dataframe_upto_current_month = self.cy_dataframe[(self.cy_dataframe['earning_month'] >= financial_year_start.date()) &
                                             (self.cy_dataframe['earning_month'] <= current_year_end.date())]
                 
+                self.full_dataframe_upto_current_month = self.full_dataframe[(self.full_dataframe['earning_month'] <= current_year_end.date())]
                 
-                    
             elif 'earning_year' in earnings_df.columns:
                 self.cy_dataframe_yearly_data = earnings_df[(earnings_df['earning_year'] == current_year.date())]
                             

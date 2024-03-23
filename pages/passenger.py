@@ -37,15 +37,15 @@ class plot_passenger_graphs:
         fig = go.Figure()
         
         if feature == 'total_pass':
-            label = 'Total Revenue'
+            label = 'Total Pass Revenue'
             unit = 'Crores'
             legend = 'Total'
         elif feature == 'uts_sub_urban_pass':
-            label = 'Sub-Urban Revenue'
+            label = 'Sub-Urban Pass Revenue'
             legend = 'Sub-Urb'
             unit = 'Crores'
         elif feature == 'non_sub_urban_revenue':
-            label = 'Non-Sub Revenue'
+            label = 'Non-Sub Pass Revenue'
             unit = 'Crores'
             legend = 'Non-Sub'
             feature = 'non_sub_urban_revenue'
@@ -54,16 +54,16 @@ class plot_passenger_graphs:
             target_df[feature] = target_df['non_sub_pass']
         elif feature == 'total_passengers':
             legend = 'Total'
-            label = 'Total Traffic'
-            unit = 'Millions'
+            label = 'Total Pass Traffic'
+            unit = 'Lakhs'
         elif feature =='sub_passengers':
             legend = 'Sub-Urb'
-            label = 'Sub-Urban Traffic'
-            unit = 'Millions'
+            label = 'Sub-Urban Pass Traffic'
+            unit = 'Lakhs'
         elif feature =='non_sub_passengers':
             legend = 'Non-Sub-Urb'
-            label = 'Non-Sub-Urban Traffic'
-            unit = 'Millions'
+            label = 'Non-Sub-Urban Pass Traffic'
+            unit = 'Lakhs'
         
             
         # Add trend lines for each category
@@ -112,7 +112,7 @@ class plot_passenger_graphs:
                 x=1,
                 font=dict(
                 family='sans-serif',
-                size=12,
+                size=15,
                 color='black',
                 ),
                 bgcolor='rgba(255, 255, 255, 0.5)',  # Background color of the legend
@@ -152,16 +152,16 @@ class plot_passenger_graphs:
 
         # Add pie charts to the subplots
         fig.add_trace(go.Pie(values=values, labels=names,
-                            title=f"<br>".join(textwrap.wrap('CY : Revenue',width=7, )),
+                            title=f"<br>".join(textwrap.wrap('CY : Pass Revenue',width=7, )),
                             textinfo='label+percent',
                             showlegend=False,insidetextorientation='radial'),
                             row=1, col=1)
         fig.add_trace(go.Pie(values=values_ly, labels=names_ly,
-                            title=f"<br>".join(textwrap.wrap('LY : Revenue',width=7, )),
+                            title=f"<br>".join(textwrap.wrap('LY : Pass Revenue',width=7, )),
                             textinfo='label+percent',
                             showlegend=False,insidetextorientation='radial'),
                             row=2, col=1)
-        fig.update_traces(hole=.8, hoverinfo="label+percent+name+value",  textfont_size=11.5,
+        fig.update_traces(hole=.8, hoverinfo="label+percent+name+value",  textfont_size=15,
                           titlefont_size=18,)
         fig.update_layout(
             margin=dict(t=0, b=0,r=0),
@@ -171,7 +171,7 @@ class plot_passenger_graphs:
                 traceorder='normal',  # Order of the legend items
                 font=dict(
                     family='sans-serif',
-                    size=10,
+                    size=15,
                     color='black'
                 ),
                 bgcolor='rgba(255, 255, 255, 0.5)',  # Background color of the legend
@@ -203,19 +203,22 @@ def update_passenger_page(selected_division):
                             value=f"total_pass_{selected_division}", 
                             # placeholder="Select Type",# default value
                             clearable=False,
+                            optionHeight=80
                         ),
-                        ],width=4, xs=12, sm=12, md=4, lg=4, xl=4),
+                        ],width=4, xs=12, sm=12, md=4, lg=4, xl=4, 
+                     
+                        ),
                         dbc.Col([
-                            
+                            html.Div(id="cy_daily_avg_revenue")
                         ],
                         width=4, xs=12, sm=12, md=4, lg=4, xl=4,
-                        className="border-secondary border rounded text-center fw-bold",
-                        id="cy_daily_avg_revenue"),
+                        className="border-secondary border rounded text-center fs-6",
+                        ),
                         dbc.Col([
-                            
+                            html.Div(id="cy_monthly_avg_revenue")
                         ],
                         width=4, xs=12, sm=12, md=4, lg=4, xl=4,
-                        className="border-secondary border rounded fw-bold",
+                        className="border-secondary border rounded text-center fs-6",
                         id="cy_monthly_avg_revenue"),
                         
                     ],className="m-1"),
@@ -227,7 +230,7 @@ def update_passenger_page(selected_division):
                             },
                         # style={'position': 'relative', 'width': '100%', 'height': '100%'}
                     )
-                    ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,
+                    ], width=5, xs=12, sm=12, md=12, lg=12, xl=5,
                     className="border-secondary border rounded"),
                     dbc.Col([
                         dcc.Graph(
@@ -237,7 +240,7 @@ def update_passenger_page(selected_division):
                             'displayModeBar': False
                             },
                         )
-                    ], width=2, xs=12, sm=12, md=2, lg=2, xl=2,className="border-secondary border rounded"),
+                    ], width=2, xs=12, sm=12, md=12, lg=12, xl=2,className="border-secondary border rounded"),
                     dbc.Col([
                         dbc.Row([
                         dbc.Col([
@@ -250,20 +253,22 @@ def update_passenger_page(selected_division):
                             ],
                             value=f"total_passengers_{selected_division}", 
                             # placeholder="Select Type",# default value
+                            optionHeight=80,
                             clearable=False,
                         ),
                         ],width=4, xs=12, sm=12, md=4, lg=4, xl=4),
                         dbc.Col([
+                            html.Div(id="cy_daily_avg_pass")
                         ],
                         width=4, xs=12, sm=12, md=4, lg=4, xl=4,
-                        className="border-secondary border rounded fw-bold",
+                        className="border-secondary border rounded fs-6 text-center",
                         id="cy_daily_avg_pass"),
                         dbc.Col([
-                            
+                            html.Div(id='cy_monthly_avg_pass')
                         ],
                         width=4, xs=12, sm=12, md=4, lg=4, xl=4,
-                        className="border-secondary border rounded fw-bold",
-                        id="cy_monthly_avg_pass"),
+                        className="border-secondary border rounded fs-6 text-center",
+                        ),
                         
                         ], className='m-1'),
                         dcc.Graph (
@@ -273,7 +278,7 @@ def update_passenger_page(selected_division):
                             },
                             # style={'position': 'relative', 'width': '100%', 'height': '100%'}
                         )
-                    ], width=5, xs=12, sm=12, md=5, lg=5, xl=5,
+                    ], width=5, xs=12, sm=12, md=12, lg=12, xl=5,
                     className="border-secondary border rounded"),
 
             ], className="flex"),
@@ -331,7 +336,7 @@ def update_graph(dropdown_value):
                 label = 'Total Revenue'
             figure, daily_avg_current , monthly_avg_current = class_object.comparison_line_plot_pass(feature)
             daily_avg_current = f"CY Daily Avg : {daily_avg_current}"
-            monthly_avg_current = f"CY Monthly Avg : {monthly_avg_current}"
+            monthly_avg_current = f"CY Month Avg : {monthly_avg_current}"
             
             return figure, label , daily_avg_current , monthly_avg_current
     except Exception as e:
@@ -367,8 +372,8 @@ def update_traffic_graph(dropdown_value):
                 feature = 'total_passengers'
                 label = 'Total Passengers'
             figure, daily_avg_current , monthly_avg_current = class_object.comparison_line_plot_pass(feature)
-            daily_avg_current = f"CY Daily Avg :{daily_avg_current}"
-            monthly_avg_current = f"CY Monthly Avg :{monthly_avg_current}"
+            daily_avg_current = f"CY Daily Avg : {daily_avg_current}"
+            monthly_avg_current = f"CY Month Avg : {monthly_avg_current}"
             return figure, label, daily_avg_current , monthly_avg_current
     except Exception as e:
         raise e
