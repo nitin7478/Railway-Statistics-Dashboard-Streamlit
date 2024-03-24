@@ -11,12 +11,11 @@ from plotly.subplots import make_subplots
 from dash.exceptions import PreventUpdate
 from src.components.database_connection import handle_database
 from src.constants.constants import *
-import textwrap , pdfkit, tempfile
+import textwrap
 from pages.goods import load_goods_page
 # from dash_html_components import html
 # from weasyprint import HTML
 import base64
-html.Script(src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js')
 
 
 def update_overview_page(selected_division):
@@ -58,12 +57,12 @@ def update_overview_page(selected_division):
                             html.I(f"{round(target_value, 2)} :: "),
                             html.I(f"{percentage_vs_tgt}%", className=f" me-2 {'text-success' if current_value > target_value else 'text-danger'}")
                         ])
-                    ],style={'backgroundColor': '#f8f9fa', 'minHeight':'100px'},),
+                    ],style={ 'minHeight':'100px'},),
+                    # 'backgroundColor': '#f8f9fa'
                 ], className="text-center m-1"),
-            ], width=2, xs=12, sm=12, md=12, lg=4, xl=2)
+            ], xs=12, sm=12, md=12, lg=6, xl=2)
         
         layout = html.Div([ 
-                    html.Script(src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js'),
                     dbc.Container([
             dbc.Row([
                     generate_revenue_card("Pune Division Revenue", class_object.division_current_gross_total_revenue, class_object.division_previous_gross_total_revenue, class_object.division_current_year_target_revenue),
@@ -73,7 +72,7 @@ def update_overview_page(selected_division):
                     generate_revenue_card("Sundry Revenue", class_object.division_current_year_sundry_revenue, class_object.division_previous_year_sundry_revenue, class_object.division_current_year_target_sundry_revenue),
                     generate_revenue_card("Originating Pass", class_object.division_current_year_originating_pass, class_object.division_previous_year_originating_pass, class_object.division_current_year_target_originating_pass),
                
-                    ], className='flex'),
+                    ]),
             dbc.Row([
                 dbc.Col(
                     [ 
@@ -107,41 +106,8 @@ def update_overview_page(selected_division):
                         )
                     ],xs=12 , sm=12, md=12 , lg=12, xl=5,className="border-secondary border rounded"
                 ),
-            ], className='flex'),
-            dbc.Row([
-                    dbc.Col([
-                        # dbc.Row([
-                        #     dbc.Col([
-                        #     dcc.Dropdown(
-                        #     id='dropdown_select_data_for_table',
-                        #     options=[
-                        #         {'label': 'Division Overview', 'value': f"division_earnings_{selected_division}"},
-                        #         {'label': 'Division Target', 'value': f"division_target_{selected_division}"},
-                        #         {'label': 'Passengers Overview', 'value': f"passenger_earning_{selected_division}"},
-                        #         {'label': 'Goods Outward', 'value': f"goods_outward_{selected_division}"},
-                        #         {'label': 'Goods Depowise Outward', 'value': f"goods_depowise_outward_{selected_division}"},
-                        #         {'label': 'Goods Commodity Wise Outward', 'value': f"goods_commodity_wise_outward_{selected_division}"},
-                        #     ],
-                        #     value=f"division_earnings_{selected_division}",
-                        #     placeholder="Select Data",
-                        #     clearable=False,
-                        #     ),
-                        #     ],xs=12 , sm=12, md=4 , lg=4, xl=4,className="border-secondary border rounded" ),
-                        #     dbc.Col([
-                        #         html.H5("Hello")
-                        #     ], className='text-center',xs=12 , sm=12, md=4 , lg=4, xl=4 ),
-                        #     ]),
-                        ]),
-                        # dbc.Row([
-                        #     dbc.Col([
-                        #             dash_table.DataTable(data=class_object.full_dataframe.to_dict('records'),)
-                        #                                 #   columns=[i for i in class_object.full_dataframe.columns])
-                        #             ], width= 12, xs=12 , sm=12, md=12 , lg=12, xl=12,className="border-secondary border rounded",
-                        #                 id='dash_table_for_data'),
-                        #         ], className='flex'),
-                        ]),
-            ], fluid=True, className="flex"),
-            html.Div(id='graph_img')
+                ], className='flex'),
+            ], fluid=True),
         ], id= 'tab_overview')
         return layout
     else:
