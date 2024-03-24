@@ -38,7 +38,7 @@ navbar = dbc.NavbarSimple(
             label="Select Division",
             children=[
                 dbc.DropdownMenuItem("Pune", id='pune_div'),
-                dbc.DropdownMenuItem("Solapur", id='sur_div'),
+                # dbc.DropdownMenuItem("Solapur", id='sur_div'),
             ],
             className="me-md-4",
             id='division_dropdown',
@@ -83,7 +83,7 @@ app.layout = dbc.Container([
     Output(component_id='page-content', component_property='children'),
     [
         Input(component_id="pune_div", component_property="n_clicks"),
-        Input(component_id="sur_div", component_property="n_clicks"),
+        # Input(component_id="sur_div", component_property="n_clicks"),
         Input(component_id='overview', component_property='n_clicks'),
         Input(component_id='passenger', component_property='n_clicks'),
         Input(component_id='goods', component_property='n_clicks'),
@@ -94,9 +94,9 @@ app.layout = dbc.Container([
     State('selected_division_session', 'data'),
     prevent_initial_call=False,
 )
-def update_dropdown(pune_clicks,sur_clicks, overview_clicks, coaching_clicks, goods_clicks, other_coaching_clicks,
+def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks, other_coaching_clicks,
                     contact_clicks, station_clicks, state):
-    if pune_clicks or sur_clicks or overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or contact_clicks or station_clicks:
+    if pune_clicks or  overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or contact_clicks or station_clicks:
         ctx = dash.callback_context
         if ctx.triggered_id:
             triggered_id = ctx.triggered_id.split('.')[0]
@@ -119,14 +119,17 @@ def update_dropdown(pune_clicks,sur_clicks, overview_clicks, coaching_clicks, go
                     label = f"{state[:1].upper()}{state[1:]}"
                     return label, state, html_page
                 elif triggered_id == 'passenger':
+                    label = f"{state[:1].upper()}{state[1:]}"
                     html_page = update_passenger_page(state)
-                    return state, state, html_page
+                    return label, state, html_page
                 elif triggered_id == 'goods':
+                    label = f"{state[:1].upper()}{state[1:]}"
                     html_page = update_goods_page(state)
-                    return state, state, html_page
+                    return label, state, html_page
                 elif triggered_id == 'other_coaching':
+                    label = f"{state[:1].upper()}{state[1:]}"
                     html_page = update_other_coaching_page(state)
-                    return state, state, html_page
+                    return label, state, html_page
             else:
                 layout = html.Div([
                     dbc.Container([
