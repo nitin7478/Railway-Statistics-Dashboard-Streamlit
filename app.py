@@ -16,6 +16,7 @@ import dash_auth
 # from dash_bootstrap_templates import load_figure_template
 # load_figure_template('')
 
+
 external_css = [dbc.themes.BOOTSTRAP]
 
 app = Dash(__name__, external_stylesheets=external_css,

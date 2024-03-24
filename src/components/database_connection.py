@@ -6,6 +6,16 @@ import datetime
 from src.constants.constants import *
 # Load environment variables from .env file
 load_dotenv()
+environment = os.getenv('ENVIRONMENT', 'development')
+
+# Load configuration based on environment
+# if environment == 'production':
+#     # Load production configuration
+#     from production_config import *
+# else:
+#     # Load local configuration
+#     from local_config import *
+
 
 class handle_database:
     def __init__(self):
