@@ -13,9 +13,7 @@ from src.components.database_connection import handle_database
 from src.constants.constants import *
 import textwrap
 from pages.goods import load_goods_page
-# from dash_html_components import html
-# from weasyprint import HTML
-import base64
+
 
 
 def update_overview_page(selected_division):

@@ -11,6 +11,7 @@ from pages.stations import update_stations_page
 from src.constants.constants import *
 from pages.pune import update_pune_division_page
 from pages.other_coaching import update_other_coaching_page
+import dash_auth
 
 # from dash_bootstrap_templates import load_figure_template
 # load_figure_template('')
@@ -22,7 +23,13 @@ app = Dash(__name__, external_stylesheets=external_css,
                        'content': 'width=device-width, initial-scale=1.0'}],
            suppress_callback_exceptions=True)
 
-
+VALID_USERNAME_PASSWORD_PAIRS = {
+    'pune': 'pune'
+}
+auth = dash_auth.BasicAuth(
+    app,
+    VALID_USERNAME_PASSWORD_PAIRS
+)
 
 navbar = dbc.NavbarSimple(
     children=[
@@ -49,6 +56,7 @@ navbar = dbc.NavbarSimple(
     dark=True,
     fluid=True,
 )
+
 
 
 
