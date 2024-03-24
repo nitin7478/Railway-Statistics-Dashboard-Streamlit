@@ -4,17 +4,10 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
 import datetime
 from src.constants.constants import *
+from config.config import ENVIRONMENT
 # Load environment variables from .env file
 load_dotenv()
-environment = os.getenv('ENVIRONMENT', 'development')
 
-# Load configuration based on environment
-# if environment == 'production':
-#     # Load production configuration
-#     from production_config import *
-# else:
-#     # Load local configuration
-#     from local_config import *
 
 
 class handle_database:
@@ -24,11 +17,12 @@ class handle_database:
         DB_NAME = os.getenv("DB_NAME")
         DB_USER = os.getenv("DB_USER")
         DB_PASSWORD = os.getenv("DB_PASSWORD")
-
         # Define the database connection URI
         DB_URI = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        # elif ENVIRONMENT== 'live':
+        #     DB_URI = "postgresql://admin:tYEL68bRug8FOg43FJa5GIM1CSiIWxYZ@dpg-co07a12cn0vc73caljcg-a.oregon-postgres.render.com/railway_dashboard_nitin"
 
-        # Create a SQLAlchemy engine
+            # Create a SQLAlchemy engine
         engine = create_engine(DB_URI)
 
         self.conn = engine.connect()
