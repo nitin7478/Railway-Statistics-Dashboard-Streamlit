@@ -14,8 +14,17 @@ layout = html.Div([
                         ],),
                         dbc.Row([
                             dbc.Col([
-                                html.I("Page will be updated soon........", className="fs-3")
+                                html.I("Page will be updated soon........", className="fs-3"),
+                                
                             ], className="d-flex justify-content-center align-items-center" , style={'marginTop':50}),
-                        ],)
+                        ],),
+                        dbc.Row([
+                            dbc.Col([
+                                html.H3("Please select division from dropdown menu", className="fs-3"),
+                                
+                            ], className="d-flex justify-content-center align-items-center" , style={'marginTop':50}),
+                        ],),
+                        
+                        
                     ]),
                 ])

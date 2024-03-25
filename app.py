@@ -24,7 +24,8 @@ app = Dash(__name__, external_stylesheets=external_css,
                        'content': 'width=device-width, initial-scale=1.0'}],
            suppress_callback_exceptions=True)
 
-server = app.server
+
+
 VALID_USERNAME_PASSWORD_PAIRS = {
     'pune': 'pune'
 }
@@ -33,6 +34,7 @@ auth = dash_auth.BasicAuth(
     VALID_USERNAME_PASSWORD_PAIRS
 )
 
+server = app.server
 navbar = dbc.NavbarSimple(
     children=[
             dbc.DropdownMenu(
@@ -151,8 +153,9 @@ def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks,
         ], fluid=True)
         label = f"{state[:1].upper()}{state[1:]}"
         return label, state, html_page
+    
     return "Select Division", None, cr.layout
 
 
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
+if __name__ == '__main__':
+    app.run_server(debug=True)
