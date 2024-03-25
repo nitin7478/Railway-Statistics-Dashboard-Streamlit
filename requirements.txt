@@ -9,3 +9,4 @@ dash_bootstrap_components
 sqlalchemy
 dash_bootstrap_templates
 gunicorn
+flask

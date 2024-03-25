@@ -24,6 +24,7 @@ app = Dash(__name__, external_stylesheets=external_css,
                        'content': 'width=device-width, initial-scale=1.0'}],
            suppress_callback_exceptions=True)
 
+server = app.server
 VALID_USERNAME_PASSWORD_PAIRS = {
     'pune': 'pune'
 }
