@@ -153,5 +153,5 @@ def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks,
     return "Select Division", None, cr.layout
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
