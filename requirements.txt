@@ -8,4 +8,4 @@ dash-auth==2.0.0
 dash_bootstrap_components
 sqlalchemy
 dash_bootstrap_templates
-uvicorn
+gunicorn
