@@ -153,8 +153,16 @@ def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks,
         ], fluid=True)
         label = f"{state[:1].upper()}{state[1:]}"
         return label, state, html_page
-    
-    return "Select Division", None, cr.layout
+    state = 'pune'
+    html_page = dbc.Container([
+        update_overview_page(state),
+        update_passenger_page(state),
+        update_goods_page(state),
+        update_other_coaching_page(state)
+    ], fluid=True)
+    label = f"{state[:1].upper()}{state[1:]}"
+    return label , state , html_page
+    # return "Select Division", None, cr.layout
 
 
 if __name__ == '__main__':

@@ -12,11 +12,11 @@ def update_pune_division_page():
                     html.Iframe(
                     id="embedded-pdf",
                     src="assets/divisions/pune.pdf",
-                    style={"width": "100%", "height": "100%", "overflow": "auto"}  # Adjust width and height as needed
+                    style={"width": "100%", "height": "100vh", "overflow": "auto" , 'border':'none'}  # Adjust width and height as needed
                     )
                 ],xs=12, sm=12, md=12, lg=12, xl=12 ),
                 
-            ], className="flex", style={"height": "80vh",'marginTop':5})
+            ], className="flex", style={'marginTop':5})
         ], fluid=True),
     ])
     
