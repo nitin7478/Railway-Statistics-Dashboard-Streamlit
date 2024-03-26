@@ -11,19 +11,28 @@ from pandasai import Agent
 
 from dotenv import load_dotenv
 import os
-
+from pandasai.helpers import path
 load_dotenv()
-
 # Access the API key
 api_key = os.getenv("PANDASAI_API_KEY")
 
 def generate_output(input_data):
+    try:
+        user_defined_path = path.find_project_root()
+    except ValueError:
+        user_defined_path = os.getcwd()
     os.environ["PANDASAI_API_KEY"]
 
     overview_object = overview_graphs_buttons(selected_division='pune')
     # Process input data using Pandas AI (replace this with your actual processing logic)
+    user_defined_path = os.path.join(user_defined_path, "exports", "charts")
     
-    agent = Agent(dfs=overview_object.full_dataframe)
+    agent = Agent(dfs=overview_object.full_dataframe,
+                  config={
+                    "save_charts_path": user_defined_path,
+                    "save_charts": True,
+                    "verbose": True,
+                  })
     response = agent.chat(input_data)
     
     return response
@@ -45,10 +54,9 @@ def update_ask_gpt_page(selected_division):
                     html.Div([],
                              id='output',
                              style={'fontWeight':500})
-
                 ])
-            ], className="flex")
-        ], fluid=True)
+            ], className="flex"),
+        ],)
         
         return layout
 
@@ -78,8 +86,21 @@ def update_output(n_clicks, input_value):
         if input_value:
             # Call the generate_output method of the load_ask_gpt class
             output_data = generate_output(str(input_value))
-            return html.Div([
-                html.Pre(output_data)
-            ])
+            image_path = os.path.join(os.getcwd(), 'exports', 'charts', 'temp_chart.png')
+            
+            if output_data=='exports/charts/temp_chart.png':
+                layout= dbc.Container([
+                    dbc.Row([
+                        html.Pre(output_data),
+                    ]),
+                    dbc.Row([
+                        html.Img(src=image_path)
+                    ]),
+                ])
+                return layout
+            else:
+                return html.Div([
+                    html.Pre(output_data)
+                ]) 
         else:
             return html.Div("Please enter some data in the input box.")
