@@ -12,6 +12,7 @@ from src.constants.constants import *
 from pages.pune import update_pune_division_page
 from pages.other_coaching import update_other_coaching_page
 import dash_auth
+from pages.ask_gpt import update_ask_gpt_page
 
 # from dash_bootstrap_templates import load_figure_template
 # load_figure_template('')
@@ -50,6 +51,7 @@ navbar = dbc.NavbarSimple(
         dbc.Button("Passenger", className="me-md-3", id='passenger'),
         dbc.Button("Goods", className="me-md-3", id='goods'),
         dbc.Button("Other Coaching", className="me-md-3", disabled=False, id='other_coaching'),
+        dbc.Button("GPT", className="me-md-3", disabled=False, id='gpt'),
         dbc.Button("Stations", className="me-md-3", disabled=False, id='stations'),
         dbc.Button("Contact Us",disabled=False, id='contact'),
         
@@ -93,13 +95,14 @@ app.layout = dbc.Container([
         Input(component_id='other_coaching', component_property='n_clicks'),
         Input(component_id='contact', component_property='n_clicks'),
         Input(component_id='stations', component_property='n_clicks'),
+        Input(component_id='gpt', component_property='n_clicks'),
     ],
     State('selected_division_session', 'data'),
     prevent_initial_call=False,
 )
 def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks, other_coaching_clicks,
-                    contact_clicks, station_clicks, state):
-    if pune_clicks or  overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or contact_clicks or station_clicks:
+                    contact_clicks, station_clicks,gpt_clicks, state):
+    if gpt_clicks or pune_clicks or  overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or contact_clicks or station_clicks:
         ctx = dash.callback_context
         if ctx.triggered_id:
             triggered_id = ctx.triggered_id.split('.')[0]
@@ -133,6 +136,10 @@ def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks,
                     label = f"{state[:1].upper()}{state[1:]}"
                     html_page = update_other_coaching_page(state)
                     return label, state, html_page
+                elif triggered_id == 'gpt':
+                    label = f"{state[:1].upper()}{state[1:]}"
+                    html_page = update_ask_gpt_page(state)
+                    return label, state, html_page
             else:
                 layout = html.Div([
                     dbc.Container([
@@ -160,6 +167,7 @@ def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks,
         update_goods_page(state),
         update_other_coaching_page(state)
     ], fluid=True)
+    # html_page = update_ask_gpt_page('pune')
     label = f"{state[:1].upper()}{state[1:]}"
     return label , state , html_page
     # return "Select Division", None, cr.layout
