@@ -41,8 +41,11 @@ class handle_database:
             
             self.full_target_dataframe = target_df
             current_date = datetime.datetime.now()
+         
             current_year = current_date.year
             current_month = current_date.month
+            current_year = 2024
+            current_month = 2
 
             if current_month < 4:  # Financial year starts from April
                 start_year = current_year - 1
@@ -77,8 +80,8 @@ class handle_database:
                                                 (earnings_df['earning_month'] <= previous_financial_year_end.date())]
     
                 
-                current_year_end = pd.Timestamp(year=end_year, month=current_month-2, day=1)
-                prev_year_end = financial_year_end = pd.Timestamp(year=end_year-1, month=current_month-2, day=1)
+                current_year_end = pd.Timestamp(year=end_year, month=current_month-1, day=1)
+                prev_year_end = financial_year_end = pd.Timestamp(year=end_year-1, month=current_month-1, day=1)
                 
                 
                 self.cy_division_target_df_upto_current_month = target_df[(target_df['earning_month'] >= financial_year_start.date()) &

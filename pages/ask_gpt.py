@@ -34,7 +34,7 @@ def generate_output(input_data):
                     "verbose": True,
                   })
     response = agent.chat(input_data)
-    
+      
     return response
 
 def update_ask_gpt_page(selected_division):

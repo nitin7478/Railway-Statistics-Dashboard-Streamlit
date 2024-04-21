@@ -13,6 +13,10 @@ from src.components.database_connection import handle_database
 from src.constants.constants import *
 import textwrap
 from pages.goods import load_goods_page
+from pages.goods import update_goods_page
+# from pages.passenger import update_passenger_page
+# from pages.stations import update_stations_page
+# from pages.other_coaching import update_other_coaching_page
 
 
 
@@ -148,8 +152,6 @@ def export_to_excel(n_clicks, selected_division):
         
     
  
-
-
 
 
 
