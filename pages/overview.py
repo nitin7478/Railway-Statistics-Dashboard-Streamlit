@@ -4,7 +4,7 @@ from dash import html, dash_table, dcc
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
-import datetime, io
+import datetime
 import pandas as pd
 from dash import dcc, html, Input, Output, callback, clientside_callback ,State
 from plotly.subplots import make_subplots
@@ -17,112 +17,122 @@ from pages.goods import update_goods_page
 # from pages.passenger import update_passenger_page
 # from pages.stations import update_stations_page
 # from pages.other_coaching import update_other_coaching_page
+from src.logger import logging 
+from src.exception import CustomException
+import sys
+
 
 
 
 def update_overview_page(selected_division):
-    if selected_division is not None:
-        
-        selected_division =  f"{selected_division[:1].upper()}{selected_division[1:]}"
-        class_object = overview_graphs_buttons(selected_division=selected_division)
-        # card_style = {
-        #     # 'minHeight':'242px',
-        #     'backgroundColor': '#e1e7f0'
-        # }
-        
-        def percentage_variation(current_value, previous_value):
-            if previous_value != 0:
-                return round(((current_value - previous_value) / previous_value) * 100, 2)
-            else:
-                return 0
+    try:
+        logging.info(f" {'='* 20} Update overview page log started. {'='*20} ")
+        if selected_division is not None:
+            selected_division =  f"{selected_division[:1].upper()}{selected_division[1:]}"
+            class_object = overview_graphs_buttons(selected_division=selected_division)
+            # card_style = {
+            #     # 'minHeight':'242px',
+            #     'backgroundColor': '#e1e7f0'
+            # }
+            
+            def percentage_variation(current_value, previous_value):
+                if previous_value != 0:
+                    return round(((current_value - previous_value) / previous_value) * 100, 2)
+                else:
+                    return 0
 
-        def generate_revenue_card(title, current_value, previous_value, target_value):
-            percentage_vs_ly = percentage_variation(current_value, previous_value)
-            percentage_vs_tgt = percentage_variation(current_value, target_value)
-            if title == 'Originating Pass':
-                label = 'Mil'
-            else:
-                label = 'Cr'
-            return dbc.Col([
-                dbc.Card([
-                    dbc.CardHeader(title, className="fs-5", style={'backgroundColor': '#bff2eb', 'fontWeight':'500', 'minHeight':'80px'}),
-                    dbc.CardBody([
-                        html.H5(f"{round(current_value, 2)} {label}", className="card-title"),
-                    ], className="border-start border-success border-3", style={'minHeight':'20px'}),
-                    dbc.CardFooter([
-                        html.Div([
-                            html.I(f"vs LY :: {round(previous_value, 2)} :: "),
-                            html.I(f"{percentage_vs_ly}% ", className=f"me-2 {'text-success' if current_value > previous_value else 'text-danger'}")
+            def generate_revenue_card(title, current_value, previous_value, target_value):
+                percentage_vs_ly = percentage_variation(current_value, previous_value)
+                percentage_vs_tgt = percentage_variation(current_value, target_value)
+                if title == 'Originating Pass':
+                    label = 'Mil'
+                else:
+                    label = 'Cr'
+                logging.info(f"successfully completed  generate_revenue_card for {title}")
+                return dbc.Col([
+                    dbc.Card([
+                        dbc.CardHeader(title, className="fs-5", style={'backgroundColor': '#bff2eb', 'fontWeight':'500', 'minHeight':'80px'}),
+                        dbc.CardBody([
+                            html.H5(f"{round(current_value, 2)} {label}", className="card-title"),
+                        ], className="border-start border-success border-3", style={'minHeight':'20px'}),
+                        dbc.CardFooter([
+                            html.Div([
+                                html.I(f"vs LY :: {round(previous_value, 2)} :: "),
+                                html.I(f"{percentage_vs_ly}% ", className=f"me-2 {'text-success' if current_value > previous_value else 'text-danger'}")
+                            ]),
+                            html.Div([
+                                html.I("vs TGT :: "),
+                                html.I(f"{round(target_value, 2)} :: "),
+                                html.I(f"{percentage_vs_tgt}%", className=f" me-2 {'text-success' if current_value > target_value else 'text-danger'}")
+                            ])
+                        ],style={ 'minHeight':'100px'},),
+                        # 'backgroundColor': '#f8f9fa'
+                    ], className="text-center m-1"),
+                ], xs=12, sm=12, md=12, lg=6, xl=2)
+            
+            layout = html.Div([ 
+                        dbc.Container([
+                dbc.Row([
+                        generate_revenue_card("Pune Division Revenue", class_object.division_current_gross_total_revenue, class_object.division_previous_gross_total_revenue, class_object.division_current_year_target_revenue),
+                        generate_revenue_card("Passenger Revenue", class_object.division_current_passenger_earning_revenue, class_object.division_previous_passenger_earning_revenue, class_object.division_current_year_target_passenger_earning_revenue),
+                        generate_revenue_card("Goods Revenue", class_object.division_current_year_goods_revenue, class_object.division_previous_year_goods_revenue, class_object.division_current_year_target_goods_revenue),
+                        generate_revenue_card("Other Cog Revenue", class_object.division_current_year_other_coaching_revenue, class_object.division_previous_year_other_coaching_revenue, class_object.division_current_year_target_other_coaching_revenue),
+                        generate_revenue_card("Sundry Revenue", class_object.division_current_year_sundry_revenue, class_object.division_previous_year_sundry_revenue, class_object.division_current_year_target_sundry_revenue),
+                        generate_revenue_card("Originating Pass", class_object.division_current_year_originating_pass, class_object.division_previous_year_originating_pass, class_object.division_current_year_target_originating_pass),
+                
                         ]),
-                        html.Div([
-                            html.I("vs TGT :: "),
-                            html.I(f"{round(target_value, 2)} :: "),
-                            html.I(f"{percentage_vs_tgt}%", className=f" me-2 {'text-success' if current_value > target_value else 'text-danger'}")
-                        ])
-                    ],style={ 'minHeight':'100px'},),
-                    # 'backgroundColor': '#f8f9fa'
-                ], className="text-center m-1"),
-            ], xs=12, sm=12, md=12, lg=6, xl=2)
+                dbc.Row([
+                    dbc.Col(
+                        [ 
+                            dcc.Graph(
+                                figure=class_object.plot_bar_chart(),
+                                config={
+                                'displayModeBar': False
+                                },
+                            ),
+                            html.Button("Download Full Data", id="btn-download", value=selected_division ),
+                            dcc.Download(id="download-data"),
+                        ],  xs=12 , sm=12, md=12 , lg=12, xl=5,
+                        className="border-secondary border rounded ",
+                    ),
+                    dbc.Col([
+                            dcc.Graph(
+                                figure=class_object.plot_pie_chart(),
+                                id="pie_revenue_distribution",
+                                config={
+                                'displayModeBar': False                 
+                                },
+                            )
+                        ], xs=12, sm=12, md=12, lg=12, xl=2,className="border-secondary border rounded"),
+                    dbc.Col(
+                        [
+                            dcc.Graph(
+                                figure=class_object.draw_revenue_trend_lines(),
+                                config={
+                                'displayModeBar': False
+                                },
+                            )
+                        ],xs=12 , sm=12, md=12 , lg=12, xl=5,className="border-secondary border rounded"
+                    ),
+                    ], className='flex'),
+                ], fluid=True),
+            ], id= 'tab_overview')
+            logging.info(f" {'='* 20} Update overview page log Finished. {'='*20} ")
+            return layout
+        else:
+            layout = html.Div([
+                        dbc.Container([
+                            dbc.Row([
+                                dbc.Col([
+                                    html.H2("Please Select Division")
+                                ], className="d-flex justify-content-center align-items-center" , style={'marginTop':20}),
+                            ],)
+                        ]),
+                    ])
+            return layout
         
-        layout = html.Div([ 
-                    dbc.Container([
-            dbc.Row([
-                    generate_revenue_card("Pune Division Revenue", class_object.division_current_gross_total_revenue, class_object.division_previous_gross_total_revenue, class_object.division_current_year_target_revenue),
-                    generate_revenue_card("Passenger Revenue", class_object.division_current_passenger_earning_revenue, class_object.division_previous_passenger_earning_revenue, class_object.division_current_year_target_passenger_earning_revenue),
-                    generate_revenue_card("Goods Revenue", class_object.division_current_year_goods_revenue, class_object.division_previous_year_goods_revenue, class_object.division_current_year_target_goods_revenue),
-                    generate_revenue_card("Other Cog Revenue", class_object.division_current_year_other_coaching_revenue, class_object.division_previous_year_other_coaching_revenue, class_object.division_current_year_target_other_coaching_revenue),
-                    generate_revenue_card("Sundry Revenue", class_object.division_current_year_sundry_revenue, class_object.division_previous_year_sundry_revenue, class_object.division_current_year_target_sundry_revenue),
-                    generate_revenue_card("Originating Pass", class_object.division_current_year_originating_pass, class_object.division_previous_year_originating_pass, class_object.division_current_year_target_originating_pass),
-               
-                    ]),
-            dbc.Row([
-                dbc.Col(
-                    [ 
-                        dcc.Graph(
-                            figure=class_object.plot_bar_chart(),
-                            config={
-                            'displayModeBar': False
-                            },
-                        ),
-                        html.Button("Download Full Data", id="btn-download", value=selected_division ),
-                        dcc.Download(id="download-data"),
-                    ],  xs=12 , sm=12, md=12 , lg=12, xl=5,
-                    className="border-secondary border rounded ",
-                ),
-                dbc.Col([
-                        dcc.Graph(
-                            figure=class_object.plot_pie_chart(),
-                            id="pie_revenue_distribution",
-                            config={
-                            'displayModeBar': False                 
-                            },
-                        )
-                    ], xs=12, sm=12, md=12, lg=12, xl=2,className="border-secondary border rounded"),
-                dbc.Col(
-                    [
-                        dcc.Graph(
-                            figure=class_object.draw_revenue_trend_lines(),
-                            config={
-                            'displayModeBar': False
-                            },
-                        )
-                    ],xs=12 , sm=12, md=12 , lg=12, xl=5,className="border-secondary border rounded"
-                ),
-                ], className='flex'),
-            ], fluid=True),
-        ], id= 'tab_overview')
-        return layout
-    else:
-        layout = html.Div([
-                    dbc.Container([
-                        dbc.Row([
-                            dbc.Col([
-                                html.H2("Please Select Division")
-                            ], className="d-flex justify-content-center align-items-center" , style={'marginTop':20}),
-                        ],)
-                    ]),
-                ])
-        return layout
+    except Exception as e:
+        raise CustomException(e , sys) from e
 
 
 @callback(
@@ -198,10 +208,11 @@ class overview_graphs_buttons:
         
     
     def plot_bar_chart(self):
+        logging.info(f"Entered plot_bar_chart in overview_page")
         # List of months
         months = ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
                 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']
-        current_date = datetime.datetime.now()
+        current_date = datetime.now()
         current_year = current_date.year
         current_month = current_date.month
         if current_month < 4:  # Financial year starts from April
@@ -268,10 +279,12 @@ class overview_graphs_buttons:
                 orientation='h',  # Horizontal orientation of the legend
             )
         )
+        logging.info(f"Successfully completed plot_bar_chart in overview_page")
         return fig
     
 
     def draw_revenue_trend_lines(self):
+        logging.info(f"Entered draw_revenue_trend_lines in overview_page")
         earnings_df = self.full_dataframe
         earnings_df = earnings_df.sort_values(by='earning_month')
         
@@ -326,10 +339,11 @@ class overview_graphs_buttons:
             )
         fig.update_xaxes(showline=True, linewidth=2, linecolor='black',)
 
-
+        logging.info(f"Successfully completed draw_revenue_trend_lines in overview_page")
         return fig
     def plot_pie_chart(self,):
-    
+        logging.info(f"Entered plot_pie_chart in overview_page")
+        
         cy_data = {
             'Passenger': self.cy_dataframe_upto_current_month['total_pass'].sum(),
             'Freight': self.cy_dataframe_upto_current_month['freight'].sum(),
@@ -383,6 +397,7 @@ class overview_graphs_buttons:
                 title_font=dict(size=20),
             ),
             )
+        logging.info(f"Successfully completed plot_pie_chart in overview_page")
         return fig
 
 

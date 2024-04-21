@@ -1,7 +1,7 @@
 import dash_bootstrap_components as dbc
 from dash import Input, Output, State, html, Dash, dcc, dash_table
 import dash
-import json
+import json, sys
 import os
 from pages import pune, sur, cr, passenger
 from pages.overview import update_overview_page
@@ -13,6 +13,9 @@ from pages.pune import update_pune_division_page
 from pages.other_coaching import update_other_coaching_page
 import dash_auth
 from pages.ask_gpt import update_ask_gpt_page
+from src.logger import logging
+from src.exception import CustomException
+    
 
 # from dash_bootstrap_templates import load_figure_template
 # load_figure_template('')
@@ -102,76 +105,82 @@ app.layout = dbc.Container([
 )
 def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks, other_coaching_clicks,
                     contact_clicks, station_clicks,gpt_clicks, state):
-    if gpt_clicks or pune_clicks or  overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or contact_clicks or station_clicks:
-        ctx = dash.callback_context
-        if ctx.triggered_id:
-            triggered_id = ctx.triggered_id.split('.')[0]
-            if triggered_id == 'pune_div':
-                selected_division = 'pune'
-                return 'Pune', selected_division, update_pune_division_page()
-            elif triggered_id == 'stations':
-                label = "Select Division"
-                state = None
-                html_page = update_stations_page()
-                return label, state, html_page
-            if state is not None:
-                if triggered_id == 'overview':
-                    html_page = dbc.Container([
-                        update_overview_page(state),
-                        update_passenger_page(state),
-                        update_goods_page(state),
-                        update_other_coaching_page(state)
-                    ], fluid=True)
-                    label = f"{state[:1].upper()}{state[1:]}"
+    try:
+        if gpt_clicks or pune_clicks or  overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or contact_clicks or station_clicks:
+            ctx = dash.callback_context
+            if ctx.triggered_id:
+                triggered_id = ctx.triggered_id.split('.')[0]
+                if triggered_id == 'pune_div':
+                    selected_division = 'pune'
+                    return 'Pune', selected_division, update_pune_division_page()
+                elif triggered_id == 'stations':
+                    label = "Select Division"
+                    state = None
+                    html_page = update_stations_page()
                     return label, state, html_page
-                elif triggered_id == 'passenger':
-                    label = f"{state[:1].upper()}{state[1:]}"
-                    html_page = update_passenger_page(state)
-                    return label, state, html_page
-                elif triggered_id == 'goods':
-                    label = f"{state[:1].upper()}{state[1:]}"
-                    html_page = update_goods_page(state)
-                    return label, state, html_page
-                elif triggered_id == 'other_coaching':
-                    label = f"{state[:1].upper()}{state[1:]}"
-                    html_page = update_other_coaching_page(state)
-                    return label, state, html_page
-                elif triggered_id == 'gpt':
-                    label = f"{state[:1].upper()}{state[1:]}"
-                    html_page = update_ask_gpt_page(state)
-                    return label, state, html_page
-            else:
-                layout = html.Div([
-                    dbc.Container([
-                        dbc.Row([
-                            dbc.Col([
-                                html.H2("Please Select Division")
-                            ], className="d-flex justify-content-center align-items-center", style={'marginTop': 20}),
-                        ],)
-                    ]),
-                ])
-                return "Select Division", None, layout
-    elif state is not None:
+                if state is not None:
+                    if triggered_id == 'overview':
+                        html_page = dbc.Container([
+                            update_overview_page(state),
+                            update_passenger_page(state),
+                            update_goods_page(state),
+                            update_other_coaching_page(state)
+                        ], fluid=True)
+                        label = f"{state[:1].upper()}{state[1:]}"
+                        return label, state, html_page
+                    elif triggered_id == 'passenger':
+                        label = f"{state[:1].upper()}{state[1:]}"
+                        html_page = update_passenger_page(state)
+                        return label, state, html_page
+                    elif triggered_id == 'goods':
+                        label = f"{state[:1].upper()}{state[1:]}"
+                        html_page = update_goods_page(state)
+                        return label, state, html_page
+                    elif triggered_id == 'other_coaching':
+                        label = f"{state[:1].upper()}{state[1:]}"
+                        html_page = update_other_coaching_page(state)
+                        return label, state, html_page
+                    elif triggered_id == 'gpt':
+                        label = f"{state[:1].upper()}{state[1:]}"
+                        html_page = update_ask_gpt_page(state)
+                        logging.info(f" Selected Division : {state} ")
+                        return label, state, html_page
+                else:
+                    layout = html.Div([
+                        dbc.Container([
+                            dbc.Row([
+                                dbc.Col([
+                                    html.H2("Please Select Division")
+                                ], className="d-flex justify-content-center align-items-center", style={'marginTop': 20}),
+                            ],)
+                        ]),
+                    ])
+                    return "Select Division", None, layout
+        elif state is not None:
+            html_page = dbc.Container([
+                update_overview_page(state),
+                update_passenger_page(state),
+                update_goods_page(state),
+                update_other_coaching_page(state)
+            ], fluid=True)
+            label = f"{state[:1].upper()}{state[1:]}"
+            return label, state, html_page
+        state = 'pune'
         html_page = dbc.Container([
             update_overview_page(state),
             update_passenger_page(state),
             update_goods_page(state),
             update_other_coaching_page(state)
         ], fluid=True)
+        # html_page = update_ask_gpt_page('pune')
         label = f"{state[:1].upper()}{state[1:]}"
-        return label, state, html_page
-    state = 'pune'
-    html_page = dbc.Container([
-        update_overview_page(state),
-        update_passenger_page(state),
-        update_goods_page(state),
-        update_other_coaching_page(state)
-    ], fluid=True)
-    # html_page = update_ask_gpt_page('pune')
-    label = f"{state[:1].upper()}{state[1:]}"
-    return label , state , html_page
-    # return "Select Division", None, cr.layout
+        return label , state , html_page
+        # return "Select Division", None, cr.layout
+    except Exception as e:
+        raise CustomException(e, sys) from e
+        
 
 
 if __name__ == '__main__':
+    logging.info(f" {'='* 20} Main Dash App started. {'='*20} ")
     app.run_server(debug=True)

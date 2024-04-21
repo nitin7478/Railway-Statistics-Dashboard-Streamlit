@@ -1,4 +1,10 @@
-# database na,es
+import os
+from datetime import datetime
+ROOT_DIR = os.getcwd()
+
+def get_current_time_stamp():
+    return f"{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}"
+
 DB_DIVISION = 'division'
 DB_STATIONS = 'station'
 DB_DIVISION_EARNINGS_OVERVIEW= 'division_earnings'

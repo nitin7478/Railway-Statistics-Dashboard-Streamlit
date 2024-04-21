@@ -11,3 +11,4 @@ dash_bootstrap_templates
 gunicorn
 flask
 pandasai
+yaml
