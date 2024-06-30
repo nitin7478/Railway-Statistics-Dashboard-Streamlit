@@ -54,7 +54,7 @@ navbar = dbc.NavbarSimple(
         dbc.Button("Passenger", className="me-md-3", id='passenger'),
         dbc.Button("Goods", className="me-md-3", id='goods'),
         dbc.Button("Other Coaching", className="me-md-3", disabled=False, id='other_coaching'),
-        dbc.Button("GPT", className="me-md-3", disabled=False, id='gpt'),
+        # dbc.Button("GPT", className="me-md-3", disabled=False, id='gpt'),
         dbc.Button("Stations", className="me-md-3", disabled=False, id='stations'),
         dbc.Button("Contact Us",disabled=False, id='contact'),
         
@@ -98,15 +98,15 @@ app.layout = dbc.Container([
         Input(component_id='other_coaching', component_property='n_clicks'),
         Input(component_id='contact', component_property='n_clicks'),
         Input(component_id='stations', component_property='n_clicks'),
-        Input(component_id='gpt', component_property='n_clicks'),
+        # Input(component_id='gpt', component_property='n_clicks'),
     ],
     State('selected_division_session', 'data'),
     prevent_initial_call=False,
 )
 def update_dropdown(pune_clicks, overview_clicks, coaching_clicks, goods_clicks, other_coaching_clicks,
-                    contact_clicks, station_clicks,gpt_clicks, state):
+                    contact_clicks, station_clicks, state):
     try:
-        if gpt_clicks or pune_clicks or  overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or contact_clicks or station_clicks:
+        if  pune_clicks or  overview_clicks or coaching_clicks or goods_clicks or other_coaching_clicks or contact_clicks or station_clicks:
             ctx = dash.callback_context
             if ctx.triggered_id:
                 triggered_id = ctx.triggered_id.split('.')[0]
